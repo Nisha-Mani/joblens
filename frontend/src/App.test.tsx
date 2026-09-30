@@ -20,9 +20,9 @@ describe('App routing', () => {
 
   it('renders the app shell with navigation for authenticated users', () => {
     storeSession(makeSession())
-    renderApp('/jobs')
+    renderApp('/analytics')
     expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Jobs' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Analytics' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Applications' })).toHaveAttribute('href', '/applications')
   })
 
