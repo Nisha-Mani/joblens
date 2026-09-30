@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { goTo } from './helpers'
+import { goTo, API_URL } from './helpers'
 
 async function registerAndOpenJobs(page: Page) {
   const email = `e2e-jobs-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`
@@ -65,7 +65,7 @@ test('jobs list paginates on the server', async ({ page, request }) => {
   await registerAndOpenJobs(page)
   const token = await page.evaluate(() => JSON.parse(localStorage.getItem('joblens.session') ?? '{}').token as string)
   for (let i = 1; i <= 12; i++) {
-    const response = await request.post('http://localhost:8081/api/jobs', {
+    const response = await request.post(`${API_URL}/api/jobs`, {
       headers: { Authorization: `Bearer ${token}` },
       data: { company: `Company ${String(i).padStart(2, '0')}`, title: 'Engineer', jobDescription: 'desc' },
     })

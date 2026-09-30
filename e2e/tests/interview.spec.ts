@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { goTo } from './helpers'
+import { goTo, API_URL } from './helpers'
 
 // The description below names four technologies → 4 technical + 3 behavioral + 2 project + 2 role-specific.
 const GENERATED = 11
@@ -98,9 +98,9 @@ test("one user cannot read another user's interview questions", async ({ page, b
   await expect(other.getByRole('heading', { name: 'Dashboard', exact: true })).toBeVisible()
   const token = await other.evaluate(() => JSON.parse(localStorage.getItem('joblens.session') ?? '{}').token as string)
 
-  const list = await request.get(`http://localhost:8081/api/interviews/questions?jobId=${jobId}`, { headers: { Authorization: `Bearer ${token}` } })
+  const list = await request.get(`${API_URL}/api/interviews/questions?jobId=${jobId}`, { headers: { Authorization: `Bearer ${token}` } })
   expect((await list.json()).totalElements).toBe(0)
-  const generate = await request.post(`http://localhost:8081/api/jobs/${jobId}/interview-questions/generate`, { headers: { Authorization: `Bearer ${token}` } })
+  const generate = await request.post(`${API_URL}/api/jobs/${jobId}/interview-questions/generate`, { headers: { Authorization: `Bearer ${token}` } })
   expect(generate.status()).toBe(404)
   await other.close()
 })

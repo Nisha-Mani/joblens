@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { API_URL } from './helpers'
 
 const password = 'correct-horse-battery'
 
@@ -37,7 +38,7 @@ test('register, reach the dashboard, sign out and sign back in', async ({ page }
 
 test('login with wrong password shows an error', async ({ page, request }) => {
   const email = uniqueEmail()
-  const response = await request.post('http://localhost:8081/api/auth/register', {
+  const response = await request.post(`${API_URL}/api/auth/register`, {
     data: { email, password },
   })
   expect(response.status()).toBe(201)
@@ -51,7 +52,7 @@ test('login with wrong password shows an error', async ({ page, request }) => {
 
 test('registering an existing email shows a conflict message', async ({ page, request }) => {
   const email = uniqueEmail()
-  await request.post('http://localhost:8081/api/auth/register', { data: { email, password } })
+  await request.post(`${API_URL}/api/auth/register`, { data: { email, password } })
 
   await page.goto('/register')
   await page.getByLabel('Email').fill(email)
@@ -86,7 +87,7 @@ test.describe('session expiry', () => {
 
   test('after being logged out by an expired token, signing in again works', async ({ page, request }) => {
     const email = uniqueEmail()
-    expect((await request.post('http://localhost:8081/api/auth/register', { data: { email, password } })).status()).toBe(201)
+    expect((await request.post(`${API_URL}/api/auth/register`, { data: { email, password } })).status()).toBe(201)
     await plantSession(page, 'eyJhbGciOiJIUzI1NiJ9.forged.signature', new Date(Date.now() + 3600_000).toISOString())
     await page.goto('/dashboard')
     await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible()

@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
+// Set E2E_BASE_URL (and E2E_API_URL) to run the same suite against an already-running stack, e.g. docker compose.
+const externalBaseUrl = process.env.E2E_BASE_URL
 const backendPort = 8081
 const frontendPort = 5174
 
@@ -12,11 +14,11 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
   use: {
-    baseURL: `http://localhost:${frontendPort}`,
+    baseURL: externalBaseUrl ?? `http://localhost:${frontendPort}`,
     trace: 'on-first-retry',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  webServer: [
+  webServer: externalBaseUrl ? undefined : [
     {
       command: './mvnw -q spring-boot:run',
       cwd: '../backend',

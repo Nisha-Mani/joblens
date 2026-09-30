@@ -1,5 +1,6 @@
 import path from 'node:path'
 import { expect, test, type Page } from '@playwright/test'
+import { API_URL } from './helpers'
 
 const fixture = path.join(__dirname, '..', 'fixtures', 'resume.pdf')
 
@@ -73,7 +74,7 @@ test("one user cannot read another user's analysis", async ({ page, browser, req
 
   const ownerToken = await page.evaluate(() => JSON.parse(localStorage.getItem('joblens.session') ?? '{}').token as string)
   const jobId = page.url().split('/').pop()
-  const list = await request.get(`http://localhost:8081/api/jobs/${jobId}/analyses`, {
+  const list = await request.get(`${API_URL}/api/jobs/${jobId}/analyses`, {
     headers: { Authorization: `Bearer ${ownerToken}` },
   })
   const analysisId = (await list.json())[0].id as string
@@ -81,7 +82,7 @@ test("one user cannot read another user's analysis", async ({ page, browser, req
   const other = await browser.newPage()
   await register(other, 'analysis-other')
   const otherToken = await other.evaluate(() => JSON.parse(localStorage.getItem('joblens.session') ?? '{}').token as string)
-  const response = await request.get(`http://localhost:8081/api/analyses/${analysisId}`, {
+  const response = await request.get(`${API_URL}/api/analyses/${analysisId}`, {
     headers: { Authorization: `Bearer ${otherToken}` },
   })
   expect(response.status()).toBe(404)
