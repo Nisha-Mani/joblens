@@ -34,6 +34,15 @@ cd backend && ./mvnw spring-boot:run
 cd frontend && npm install && npm run dev
 ```
 
+## AI analysis
+
+JobLens compares your resume with a job description and reports a match score, matching and missing skills, keyword gaps, an experience assessment, resume suggestions and interview topics.
+
+- `AI_PROVIDER=mock` (default): deterministic, free, no network. Used for development, tests and E2E.
+- `AI_PROVIDER=openai`: set `OPENAI_API_KEY` (and optionally `OPENAI_MODEL`). Resume skills and experience text and the job description are sent to OpenAI; contact details are not.
+
+Other AI settings: `AI_TIMEOUT_SECONDS`, `AI_MAX_OUTPUT_TOKENS`, `ANALYSIS_RATE_LIMIT_PER_HOUR`.
+
 ## Tests
 
 ```bash

@@ -44,3 +44,18 @@ The application row stores only its current status, so a separate append-only `a
 
 ## ADR-015: List state lives in the URL
 Search, filters, sort and page are query parameters on the list pages. Reloads, back/forward and shared links restore the exact view, and TanStack Query keys derive from the same values, so there is no separate UI state to drift out of sync.
+
+## ADR-016: AI is one capability behind an interface, not the architecture
+All model access goes through `AiClient`. Implementations: `OpenAiClient` (Chat Completions with strict JSON-schema structured output) and `MockAiClient` (deterministic, default). The mock reads the same prompt a real model would and answers in the same schema, so the full pipeline (prompt → parse → validate → store → render) runs in development, CI and E2E with no API key and no cost. Switching provider is a configuration change (`AI_PROVIDER`). The frontend never talks to a model.
+
+## ADR-017: Never trust model output
+`AiResponseParser` is the only path from model text to stored data. Structure, types and ranges are validated strictly (score must be an integer 0-100, required fields and types must match, a skill cannot be both matching and missing); anything else is rejected. Sizes are bounded by trimming. Fences and chatter around the JSON are tolerated. Unusable output triggers exactly one retry, then a clear user error; nothing invalid is ever persisted. Rejection reasons are logged, the model output is not.
+
+## ADR-018: Minimise what is sent to the model
+`PromptTemplateService` decides what leaves the system: no name, email or phone; skills plus size-bounded experience; a truncated job description; and deterministic hints (technologies and years detected in the posting by the backend). This cuts tokens and cost, reduces privacy exposure and improves answer quality. User text is prevented from forging the `<resume>`/`<job>` delimiter tags, and the system prompt instructs the model to treat tagged content as data.
+
+## ADR-019: Do not hold a transaction open during an AI call
+`ResumeAnalysisService` is intentionally not `@Transactional`. A model call can take many seconds; holding a database connection that long would exhaust the pool under modest load. Reads and the final write each commit on their own.
+
+## ADR-020: Per-user rate limit, in memory
+`AnalysisRateLimiter` caps analyses per user per hour (default 20) to bound cost and abuse. It is a sliding window kept in memory: simple and dependency-free, but per application instance and reset on restart. Running several instances would need a shared store (for example Redis or a database counter); that trade-off is accepted until there is more than one instance.
