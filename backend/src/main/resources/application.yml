@@ -11,6 +11,10 @@ spring:
     open-in-view: false
   flyway:
     enabled: true
+  servlet:
+    multipart:
+      max-file-size: ${MAX_UPLOAD_MB:5}MB
+      max-request-size: ${MAX_UPLOAD_MB:5}MB
 
 management:
   endpoints:
@@ -23,6 +27,8 @@ management:
         enabled: true
 
 app:
+  storage:
+    local-dir: ${STORAGE_LOCAL_DIR:./data/uploads}
   jwt:
     secret: ${JWT_SECRET:}
     expiry-minutes: ${JWT_EXPIRY_MINUTES:60}
