@@ -1,5 +1,6 @@
 import path from 'node:path'
 import { expect, test } from '@playwright/test'
+import { goTo } from './helpers'
 
 const fixture = path.join(__dirname, '..', 'fixtures', 'resume.pdf')
 
@@ -11,7 +12,7 @@ test('upload a PDF resume, review parsed data, edit it and delete the version', 
   await page.getByRole('button', { name: 'Create account' }).click()
   await expect(page.getByRole('heading', { name: 'Dashboard', exact: true })).toBeVisible()
 
-  await page.getByRole('link', { name: 'Resume' }).click()
+  await goTo(page, 'Resume')
   await expect(page.getByText('No resume yet')).toBeVisible()
 
   await page.getByLabel(/upload a resume/i).setInputFiles(fixture)
@@ -45,7 +46,7 @@ test('rejects a non-PDF file with a clear message', async ({ page }) => {
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Password').fill('correct-horse-battery')
   await page.getByRole('button', { name: 'Create account' }).click()
-  await page.getByRole('link', { name: 'Resume' }).click()
+  await goTo(page, 'Resume')
 
   await page.getByLabel(/upload a resume/i).setInputFiles({
     name: 'notes.pdf',

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { goTo } from './helpers'
 
 // The description below names four technologies → 4 technical + 3 behavioral + 2 project + 2 role-specific.
 const GENERATED = 11
@@ -11,7 +12,7 @@ async function registerWithJob(page: Page, label: string) {
   await page.getByRole('button', { name: 'Create account' }).click()
   await expect(page.getByRole('heading', { name: 'Dashboard', exact: true })).toBeVisible()
 
-  await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Jobs', exact: true }).click()
+  await goTo(page, 'Jobs')
   await page.getByRole('link', { name: 'Add job' }).click()
   await page.getByLabel('Company').fill('Globex')
   await page.getByLabel('Job title').fill('Platform Engineer')
@@ -78,7 +79,7 @@ test('interview prep asks for a job when none exist', async ({ page }) => {
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Password').fill('correct-horse-battery')
   await page.getByRole('button', { name: 'Create account' }).click()
-  await page.getByRole('link', { name: 'Interview prep' }).click()
+  await goTo(page, 'Interview prep')
   await expect(page.getByText('Add a job first')).toBeVisible()
 })
 

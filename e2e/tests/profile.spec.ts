@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { goTo } from './helpers'
 
 test('profile and skills persist across reloads', async ({ page }) => {
   const email = `e2e-profile-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`
@@ -9,7 +10,7 @@ test('profile and skills persist across reloads', async ({ page }) => {
   await page.getByRole('button', { name: 'Create account' }).click()
   await expect(page.getByRole('heading', { name: 'Dashboard', exact: true })).toBeVisible()
 
-  await page.getByRole('link', { name: 'Profile' }).click()
+  await goTo(page, 'Profile')
   await expect(page.getByText('No skills yet')).toBeVisible()
 
   await page.getByLabel('Name').fill('Playwright Tester')
