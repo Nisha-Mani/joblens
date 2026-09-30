@@ -62,7 +62,7 @@ jobs:
                   return f"{100 * c / (m + c):.1f}%"
               print(f"### Backend coverage\nLine **{pct('LINE')}** · Branch **{pct('BRANCH')}**")
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: backend-reports
@@ -103,7 +103,7 @@ jobs:
               echo "- \`$(basename "$f")\`: $(du -k "$f" | cut -f1) kB ($(gzip -c "$f" | wc -c | awk '{printf "%.0f", $1/1024}') kB gzipped)"
             done
           } >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: frontend-coverage
@@ -152,7 +152,7 @@ jobs:
         working-directory: e2e
       - run: npx playwright test
         working-directory: e2e
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-report-dev
