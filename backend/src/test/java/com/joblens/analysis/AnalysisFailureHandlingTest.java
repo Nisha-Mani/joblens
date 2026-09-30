@@ -144,7 +144,7 @@ class AnalysisFailureHandlingTest {
             analyze().andExpect(status().isCreated());
         }
         analyze().andExpect(status().isTooManyRequests())
-            .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("3 analyses per hour")));
+            .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("3 AI requests per hour")));
         verify(aiClient, times(3)).complete(any(AiRequest.class));
     }
 

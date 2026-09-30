@@ -1,9 +1,8 @@
 package com.joblens.analysis;
 
-import com.joblens.analysis.ai.AiClient;
 import com.joblens.analysis.ai.AiException;
+import com.joblens.analysis.ai.AiPipeline;
 import com.joblens.analysis.ai.AiRequest;
-import com.joblens.analysis.ai.AiResponse;
 import com.joblens.analysis.dto.AnalysisResponse;
 import com.joblens.analysis.dto.AnalysisSummary;
 import com.joblens.common.error.ApiException;
@@ -36,20 +35,20 @@ public class ResumeAnalysisService {
     private final JobService jobs;
     private final ResumeService resumes;
     private final PromptTemplateService prompts;
-    private final AiClient aiClient;
+    private final AiPipeline pipeline;
     private final AiResponseParser parser;
     private final ResumeAnalysisRepository analyses;
     private final AnalysisRateLimiter rateLimiter;
     private final JsonMapper json;
 
     public ResumeAnalysisService(JobService jobs, ResumeService resumes, PromptTemplateService prompts,
-                                 AiClient aiClient, AiResponseParser parser,
+                                 AiPipeline pipeline, AiResponseParser parser,
                                  ResumeAnalysisRepository analyses, AnalysisRateLimiter rateLimiter,
                                  JsonMapper json) {
         this.jobs = jobs;
         this.resumes = resumes;
         this.prompts = prompts;
-        this.aiClient = aiClient;
+        this.pipeline = pipeline;
         this.parser = parser;
         this.analyses = analyses;
         this.rateLimiter = rateLimiter;
@@ -68,26 +67,19 @@ public class ResumeAnalysisService {
 
         AiRequest request = prompts.buildAnalysisRequest(resume.parsed(), job);
         long started = System.nanoTime();
-        AiResponse response;
-        AnalysisResult result;
+        AiPipeline.Result<AnalysisResult> outcome;
         try {
-            response = aiClient.complete(request);
-            result = parser.parse(response.content());
-        } catch (AiException first) {
-            if (!isInvalidResponse(first)) {
-                log.warn("Analysis failed for job {}: {}", jobId, first.getStatus());
-                throw first;
-            }
-            // Models occasionally produce unusable output; one more attempt is cheap insurance.
-            log.warn("Invalid AI output for job {}, retrying once", jobId);
-            response = aiClient.complete(request);
-            result = parser.parse(response.content());
+            outcome = pipeline.run(request, parser::parse);
+        } catch (AiException e) {
+            log.warn("Analysis failed for job {}: {}", jobId, e.getStatus());
+            throw e;
         }
+        AnalysisResult result = outcome.value();
 
         ResumeAnalysis saved = analyses.save(new ResumeAnalysis(userId, jobId, resume.id(), resume.version(),
             result.overallScore(), write(result.matchingSkills()), write(result.missingSkills()),
             write(result.keywordGaps()), result.experienceAssessment(), write(result.suggestions()),
-            write(result.interviewTopics()), response.model()));
+            write(result.interviewTopics()), outcome.model()));
         log.info("Analysis completed: id={} job={} score={} model={} totalMs={}", saved.getId(), jobId,
             saved.getOverallScore(), saved.getModel(), (System.nanoTime() - started) / 1_000_000);
         return toResponse(saved);
@@ -104,10 +96,6 @@ public class ResumeAnalysisService {
     public AnalysisResponse get(UUID userId, UUID id) {
         return toResponse(analyses.findByIdAndUserId(id, userId)
             .orElseThrow(() -> new NotFoundException("Analysis not found")));
-    }
-
-    private static boolean isInvalidResponse(AiException e) {
-        return e.getStatus() == HttpStatus.BAD_GATEWAY && e.getMessage().contains("unusable");
     }
 
     private AnalysisResponse toResponse(ResumeAnalysis a) {

@@ -36,7 +36,7 @@ class AnalysisRateLimiterTest {
         assertThatThrownBy(() -> limiter.acquire(user))
             .isInstanceOf(ApiException.class)
             .satisfies(e -> assertThat(((ApiException) e).getStatus()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS))
-            .hasMessageContaining("2 analyses per hour");
+            .hasMessageContaining("2 AI requests per hour");
     }
 
     @Test

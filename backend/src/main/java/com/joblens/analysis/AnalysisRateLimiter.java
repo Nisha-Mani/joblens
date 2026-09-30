@@ -13,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
- * Per-user sliding-window limit on AI analyses, to cap cost and abuse. State is in memory, so it
+ * Per-user sliding-window limit on AI requests (analyses and question generation), to cap cost and abuse. State is in memory, so it
  * is per application instance and resets on restart; a shared store would be needed to enforce
  * the limit across several instances.
  */
@@ -42,7 +42,7 @@ public class AnalysisRateLimiter {
             if (window.size() >= limit) {
                 long minutes = Math.max(1, Duration.between(now, window.peekFirst().plus(WINDOW)).toMinutes() + 1);
                 throw new ApiException(HttpStatus.TOO_MANY_REQUESTS,
-                    "You have reached the limit of " + limit + " analyses per hour. Try again in about "
+                    "You have reached the limit of " + limit + " AI requests per hour. Try again in about "
                         + minutes + " minute" + (minutes == 1 ? "" : "s") + ".");
             }
             window.addLast(now);

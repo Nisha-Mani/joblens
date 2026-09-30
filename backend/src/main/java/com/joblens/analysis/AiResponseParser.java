@@ -1,15 +1,13 @@
 package com.joblens.analysis;
 
 import com.joblens.analysis.ai.AiException;
+import com.joblens.analysis.ai.AiJson;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -21,8 +19,6 @@ import tools.jackson.databind.json.JsonMapper;
  */
 @Component
 public class AiResponseParser {
-
-    private static final Logger log = LoggerFactory.getLogger(AiResponseParser.class);
 
     static final int MAX_SKILLS = 50;
     static final int MAX_SKILL_LENGTH = 60;
@@ -39,7 +35,7 @@ public class AiResponseParser {
     }
 
     public AnalysisResult parse(String raw) {
-        JsonNode root = readObject(raw);
+        JsonNode root = AiJson.readObject(json, raw);
 
         int score = score(root.get("overallScore"));
         List<String> matching = list(root, "matchingSkills", MAX_SKILLS, MAX_SKILL_LENGTH);
@@ -53,43 +49,6 @@ public class AiResponseParser {
             throw reject("a skill is listed as both matching and missing");
         }
         return new AnalysisResult(score, matching, missing, gaps, assessment, suggestions, topics);
-    }
-
-    private JsonNode readObject(String raw) {
-        if (raw == null || raw.isBlank()) {
-            throw reject("empty response");
-        }
-        String candidate = stripFences(raw.strip());
-        try {
-            JsonNode node = json.readTree(candidate);
-            if (node != null && node.isObject()) {
-                return node;
-            }
-        } catch (JacksonException ignored) {
-            // fall through to the lenient extraction below
-        }
-        int start = candidate.indexOf('{');
-        int end = candidate.lastIndexOf('}');
-        if (start >= 0 && end > start) {
-            try {
-                JsonNode node = json.readTree(candidate.substring(start, end + 1));
-                if (node != null && node.isObject()) {
-                    return node;
-                }
-            } catch (JacksonException ignored) {
-                // reported below
-            }
-        }
-        throw reject("not a JSON object");
-    }
-
-    private static String stripFences(String value) {
-        if (value.startsWith("```")) {
-            int firstNewline = value.indexOf('\n');
-            String body = firstNewline >= 0 ? value.substring(firstNewline + 1) : value.substring(3);
-            return body.endsWith("```") ? body.substring(0, body.length() - 3).strip() : body.strip();
-        }
-        return value;
     }
 
     private int score(JsonNode node) {
@@ -144,7 +103,6 @@ public class AiResponseParser {
     }
 
     private AiException reject(String reason) {
-        log.warn("AI response rejected: {}", reason);
-        return AiException.invalidResponse();
+        return AiJson.reject(reason);
     }
 }
