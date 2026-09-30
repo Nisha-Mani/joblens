@@ -1,5 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import { AppLayout } from '../components/layout/AppLayout'
+import { ProtectedRoute } from '../features/auth/ProtectedRoute'
+import { LoginPage, RegisterPage } from '../pages/AuthPages'
 import HomePage from '../pages/HomePage'
 import NotFoundPage from '../pages/NotFoundPage'
 import PlaceholderPage from '../pages/PlaceholderPage'
@@ -17,14 +19,18 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
-      <Route element={<AppLayout />}>
-        {sections.map((s) => (
-          <Route
-            key={s.path}
-            path={s.path}
-            element={<PlaceholderPage title={s.title} description={s.description} />}
-          />
-        ))}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppLayout />}>
+          {sections.map((s) => (
+            <Route
+              key={s.path}
+              path={s.path}
+              element={<PlaceholderPage title={s.title} description={s.description} />}
+            />
+          ))}
+        </Route>
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
