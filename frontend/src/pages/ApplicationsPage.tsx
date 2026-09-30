@@ -72,7 +72,7 @@ export default function ApplicationsPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <PageHeader title="Applications" description="Every role you are pursuing, and where it stands." />
-        <Link to="/applications/new" className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
+        <Link to="/applications/new" className="shrink-0 whitespace-nowrap rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
           Add application
         </Link>
       </div>
@@ -134,7 +134,8 @@ export default function ApplicationsPage() {
                     <td className="px-4 py-2"><Link className="underline" to={`/applications/${a.id}`}>{a.title}</Link></td>
                     <td className="px-4 py-2">
                       <div className="flex items-center gap-2">
-                        <StatusBadge status={a.status} />
+                        {/* The select already states the status on small screens; the badge adds colour on wider ones. */}
+                        <span className="hidden sm:inline"><StatusBadge status={a.status} /></span>
                         <select aria-label={`Change status for ${a.title} at ${a.company}`} value={a.status}
                           disabled={changeStatus.isPending}
                           onChange={(e) => changeStatus.mutate({ id: a.id, status: e.target.value as ApplicationStatus })}

@@ -58,7 +58,7 @@ export default function JobsPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <PageHeader title="Jobs" description="Roles you are considering or have applied to." />
-        <Link to="/jobs/new" className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
+        <Link to="/jobs/new" className="shrink-0 whitespace-nowrap rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
           Add job
         </Link>
       </div>

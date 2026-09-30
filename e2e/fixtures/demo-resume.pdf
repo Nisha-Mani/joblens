@@ -1,0 +1,66 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 1574 >>
+stream
+BT /F1 10.5 Tf 13.5 TL 50 750 Td
+(Alex Morgan) Tj T*
+(alex.morgan@example.com | +1 \(555\) 010-2030) Tj T*
+() Tj T*
+(SUMMARY) Tj T*
+(Full-stack engineer with seven years of experience building web platforms with Java, Spring Boot,) Tj T*
+(React and TypeScript, focused on reliable APIs and accessible interfaces.) Tj T*
+() Tj T*
+(SKILLS) Tj T*
+(Languages: Java, TypeScript, JavaScript, Python, SQL) Tj T*
+(Frameworks: Spring Boot, React, Node.js, Express) Tj T*
+(Data: PostgreSQL, MySQL, MongoDB, DynamoDB) Tj T*
+(Cloud and tooling: AWS, Docker, GitHub Actions, CI/CD, Git, Linux) Tj T*
+(Testing: JUnit, Mockito, Jest, Playwright) Tj T*
+() Tj T*
+(EXPERIENCE) Tj T*
+(Senior Software Engineer, Northwind Systems \(2022 - Present\)) Tj T*
+(Led a team of four building a REST API platform on Spring Boot and PostgreSQL deployed to AWS.) Tj T*
+(Introduced CI/CD with GitHub Actions and Docker, cutting release time from days to hours.) Tj T*
+() Tj T*
+(Software Engineer, Contoso Labs \(2019 - 2022\)) Tj T*
+(Built React and TypeScript dashboards consumed by internal analytics teams.) Tj T*
+(Wrote integration tests with JUnit and Playwright to stabilise releases.) Tj T*
+() Tj T*
+(EDUCATION) Tj T*
+(B.S. Computer Science, Riverside University \(2018\)) Tj T*
+() Tj T*
+(PROJECTS) Tj T*
+(JobLens - job search platform built with React, Spring Boot, PostgreSQL and Docker) Tj T*
+(Open-source REST client - TypeScript library with full test coverage) Tj T*
+() Tj T*
+(CERTIFICATIONS) Tj T*
+(AWS Certified Developer - Associate) Tj T*
+(Oracle Certified Professional, Java SE) Tj T*
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000001867 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1937
+%%EOF
