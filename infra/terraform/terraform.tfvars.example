@@ -1,0 +1,6 @@
+# Copy to terraform.tfvars (git-ignored). Secrets such as openai_api_key belong in TF_VAR_* environment variables.
+aws_region        = "us-east-1"
+backend_image_tag = "REPLACE_WITH_GIT_SHA"
+
+# ai_provider = "openai"          # then export TF_VAR_openai_api_key and set enable_nat_gateway = true
+# enable_nat_gateway = true
