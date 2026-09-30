@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/joblens_test}
+    username: ${POSTGRES_USER:joblens}
+    password: ${POSTGRES_PASSWORD:}

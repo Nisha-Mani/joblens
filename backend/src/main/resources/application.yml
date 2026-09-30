@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: joblens
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/joblens}
+    username: ${POSTGRES_USER:joblens}
+    password: ${POSTGRES_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+
+logging:
+  level:
+    com.joblens: INFO
