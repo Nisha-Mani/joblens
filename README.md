@@ -24,7 +24,7 @@ Prerequisites: JDK 21+, Node 20+, Docker.
 ```bash
 cp .env.example .env            # then set POSTGRES_PASSWORD (and later JWT_SECRET, OPENAI_API_KEY)
 docker compose up -d            # PostgreSQL
-docker exec joblens-postgres-1 psql -U joblens -d joblens -c "CREATE DATABASE joblens_test"   # once, for backend tests
+for db in joblens_test joblens_e2e; do docker exec joblens-postgres-1 psql -U joblens -d joblens -c "CREATE DATABASE $db"; done   # once, for backend and E2E tests
 
 # backend (http://localhost:8080)
 set -a; source .env; set +a
@@ -39,6 +39,7 @@ cd frontend && npm install && npm run dev
 ```bash
 cd backend && set -a && source ../.env && set +a && ./mvnw test
 cd frontend && npm run lint && npm test && npm run build
+cd e2e && npm install && npx playwright install chromium && npx playwright test   # needs joblens_e2e DB
 ```
 
 ## Documentation

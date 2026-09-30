@@ -17,3 +17,12 @@ Latest stable Boot line at project start. Bytecode targets Java 21 (LTS) even th
 
 ## ADR-006: Tests run against real PostgreSQL
 Backend tests use a dedicated `joblens_test` database (Flyway migrations included) rather than H2, so SQL and JSONB behaviour match production.
+
+## ADR-007: Spring's OAuth2 resource server for JWT validation
+Tokens are signed with HS256 (shared secret, minimum 32 bytes, validated at startup) and verified by Spring Security's resource server rather than a hand-written filter. This gives correct handling of signature, expiry and issuer checks with far less custom security code. Roles travel in a `role` claim and map to `ROLE_*` authorities. Login returns the same generic error for unknown email and wrong password, and compares against a dummy hash for unknown emails to reduce timing differences.
+
+## ADR-008: Application-level JWT instead of an external identity provider
+JobLens owns its users, so email/password with app-issued JWTs keeps the system self-contained and easy to run locally. An identity provider such as Azure AD (MSAL) or Cognito would be the better choice when SSO, MFA, enterprise federation or centralised user lifecycle are needed: the provider handles credential storage, token issuance and rotation, and the API only validates tokens. The resource-server setup here would carry over, swapping the HS256 secret for the provider's JWKS endpoint.
+
+## ADR-009: Session stored in localStorage
+The SPA keeps the access token and its expiry in `localStorage`, clears it on logout, on expiry (timer) and whenever the API answers 401 to an authenticated request. Tradeoff: any XSS could read the token, whereas an httpOnly cookie cannot be read by scripts but then needs CSRF protection. For this MVP the simpler model is accepted; moving to httpOnly cookies plus refresh tokens is a documented future improvement.
