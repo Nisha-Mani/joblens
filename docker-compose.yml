@@ -1,3 +1,7 @@
+# Local full stack: `docker compose up --build` then open http://localhost:${FRONTEND_PORT:-8080}
+# Secrets come from your shell or a git-ignored .env file (see .env.example); none live in this file.
+# Keep the text after ":?" free of punctuation such as hyphens: older Compose releases (seen on v2.1)
+# mis-parse it and silently substitute the message for the variable's value.
 services:
   postgres:
     image: postgres:16-alpine
@@ -15,5 +19,37 @@ services:
       timeout: 3s
       retries: 10
 
+  backend:
+    build: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-joblens}
+      POSTGRES_USER: ${POSTGRES_USER:-joblens}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      JWT_EXPIRY_MINUTES: ${JWT_EXPIRY_MINUTES:-60}
+      AI_PROVIDER: ${AI_PROVIDER:-mock}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      ANALYSIS_RATE_LIMIT_PER_HOUR: ${ANALYSIS_RATE_LIMIT_PER_HOUR:-20}
+      CORS_ALLOWED_ORIGINS: http://localhost:${FRONTEND_PORT:-8080}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-5}
+    volumes:
+      - uploads:/data/uploads
+    # Not published to the host: the browser reaches it through the frontend's /api proxy.
+    expose:
+      - "8080"
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+
 volumes:
   pgdata:
+  uploads:
