@@ -68,3 +68,9 @@ Questions are stored per job (the original sketch tied them to an analysis, but 
 
 ## ADR-023: A resume is optional for interview questions
 Technical and role-specific questions come from the job description alone, so generation works before a resume is uploaded; a resume sharpens the project questions. Analysis, which is inherently a comparison, still requires one.
+
+## ADR-024: Analytics are computed in PostgreSQL, funnel metrics from status history
+`GET /api/analytics/dashboard` runs a handful of user-scoped aggregate queries (`JdbcClient`, plain SQL) and returns a small pre-aggregated payload; the browser never receives raw rows to count. Funnel questions ("ever reached interview", response rate) read `application_status_history`, because the current status forgets that a rejected application once had an interview. Definitions: *applied* = ever moved beyond SAVED; *responded* = ever reached SCREENING, INTERVIEW, OFFER or REJECTED (a withdrawal is the user's action, not a response); rates are fractions, or null when there is nothing to divide by so "no data" is never shown as 0%. Months are UTC; the monthly series is generated in SQL so empty months appear as zeros. Top missing skills count only each job's latest analysis, so re-running an analysis cannot inflate a gap.
+
+## ADR-025: Plain HTML/CSS charts with a table fallback
+The dashboard's charts are single-series bars, so they are drawn with semantic HTML and CSS instead of a charting library: smaller bundle, trivial to test, and accessible by construction (every bar is directly labelled, charts expose an accessible summary, and each has a "view data as table" alternative). One hue per chart (blue for volume, orange for gaps) rather than a colour per status, so meaning never depends on colour alone. A library such as Recharts remains the right choice if interactive multi-series charts are added.
