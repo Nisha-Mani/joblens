@@ -1,5 +1,7 @@
 # JobLens
 
+[![CI](https://github.com/Nisha-Mani/joblens/actions/workflows/ci.yml/badge.svg)](https://github.com/Nisha-Mani/joblens/actions/workflows/ci.yml)
+
 AI-powered job search and resume intelligence platform.
 
 JobLens helps software engineers understand how their experience aligns with job opportunities, identify skill gaps, improve their resumes, prepare for interviews, and track their applications.
