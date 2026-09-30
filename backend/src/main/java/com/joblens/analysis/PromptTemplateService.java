@@ -46,24 +46,37 @@ public class PromptTemplateService {
     private final JsonMapper json;
     private final String systemPrompt;
     private final String analysisSchema;
+    private final String interviewPrompt;
+    private final String interviewSchema;
 
     public PromptTemplateService(JsonMapper json) {
         this.json = json;
         this.systemPrompt = load("ai/resume-job-analysis.txt");
         this.analysisSchema = load("ai/analysis-schema.json");
+        this.interviewPrompt = load("ai/interview-questions.txt");
+        this.interviewSchema = load("ai/interview-schema.json");
     }
 
     public AiRequest buildAnalysisRequest(ParsedResume resume, Job job) {
+        return build(AiPurpose.RESUME_JOB_ANALYSIS, systemPrompt, "resume_job_analysis", analysisSchema, resume, job);
+    }
+
+    /** Interview questions tailored to a job; {@code resume} may be null when none is uploaded. */
+    public AiRequest buildInterviewRequest(ParsedResume resume, Job job) {
+        return build(AiPurpose.INTERVIEW_QUESTIONS, interviewPrompt, "interview_questions", interviewSchema, resume, job);
+    }
+
+    private AiRequest build(AiPurpose purpose, String system, String schemaName, String schema,
+                            ParsedResume resume, Job job) {
         String resumeJson = toJson(resumeInput(resume));
         String jobJson = toJson(jobInput(job));
         String user = "<" + RESUME_TAG + ">\n" + resumeJson + "\n</" + RESUME_TAG + ">\n"
             + "<" + JOB_TAG + ">\n" + jobJson + "\n</" + JOB_TAG + ">";
 
-        if (systemPrompt.length() + user.length() > MAX_PROMPT_CHARS) {
+        if (system.length() + user.length() > MAX_PROMPT_CHARS) {
             throw AiException.inputTooLarge();
         }
-        return new AiRequest(AiPurpose.RESUME_JOB_ANALYSIS, systemPrompt, user,
-            "resume_job_analysis", analysisSchema);
+        return new AiRequest(purpose, system, user, schemaName, schema);
     }
 
     /** Extracts the JSON document between {@code <tag>} and {@code </tag>} of a prompt built here. */
@@ -79,7 +92,9 @@ public class PromptTemplateService {
         }
     }
 
-    private Object resumeInput(ParsedResume resume) {
+    private Object resumeInput(ParsedResume source) {
+        ParsedResume resume = source != null ? source
+            : new ParsedResume(null, null, null, null, null, null, null, null, null);
         Map<String, Object> input = new LinkedHashMap<>();
         input.put("summary", clean(resume.summary(), MAX_SUMMARY_CHARS));
         input.put("skills", resume.skills().stream().limit(MAX_SKILLS).map(s -> clean(s, 60)).toList());

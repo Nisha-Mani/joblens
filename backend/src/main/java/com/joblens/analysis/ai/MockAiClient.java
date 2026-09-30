@@ -31,6 +31,56 @@ public class MockAiClient implements AiClient {
 
     @Override
     public AiResponse complete(AiRequest request) {
+        return switch (request.purpose()) {
+            case RESUME_JOB_ANALYSIS -> analysis(request);
+            case INTERVIEW_QUESTIONS -> interviewQuestions(request);
+        };
+    }
+
+    private AiResponse interviewQuestions(AiRequest request) {
+        JsonNode resume = PromptTemplateService.section(json, request.user(), PromptTemplateService.RESUME_TAG);
+        JsonNode job = PromptTemplateService.section(json, request.user(), PromptTemplateService.JOB_TAG);
+        List<String> skills = strings(job.path("detectedSkills"));
+        String title = job.path("title").asString("this role");
+        String company = job.path("company").asString("the company");
+
+        var questions = json.createArrayNode();
+        String[] difficulties = {"HARD", "MEDIUM", "MEDIUM", "MEDIUM", "EASY"};
+        int technical = 0;
+        for (String skill : skills.stream().limit(5).toList()) {
+            questions.add(question("Describe a production problem you solved with " + skill
+                + " and the trade-offs you weighed.", "TECHNICAL", difficulties[technical++ % difficulties.length], List.of(skill)));
+        }
+        if (technical == 0) {
+            questions.add(question("How do you design and version a REST API that several teams depend on?",
+                "TECHNICAL", "MEDIUM", List.of()));
+        }
+        questions.add(question("Tell me about a time you disagreed with a teammate. How was it resolved?", "BEHAVIORAL", "EASY", List.of()));
+        questions.add(question("Describe a project that failed or slipped. What did you change afterwards?", "BEHAVIORAL", "MEDIUM", List.of()));
+        questions.add(question("How do you handle ambiguous requirements from a stakeholder?", "BEHAVIORAL", "MEDIUM", List.of()));
+        boolean hasExperience = !resume.path("experience").isEmpty() || !resume.path("projects").isEmpty();
+        questions.add(question(hasExperience
+            ? "Walk me through the project on your resume that best shows your fit for " + title + "."
+            : "Describe a project you are proud of and your exact contribution to it.", "PROJECT", "MEDIUM", List.of()));
+        questions.add(question("What was the hardest technical decision in your most recent role, and would you make it again?", "PROJECT", "HARD", List.of()));
+        questions.add(question("What would your first 90 days as " + title + " at " + company + " look like?", "ROLE_SPECIFIC", "MEDIUM", List.of()));
+        questions.add(question("How would you decide what to build first when everything for " + title + " seems urgent?", "ROLE_SPECIFIC", "HARD", List.of()));
+
+        var result = json.createObjectNode();
+        result.set("questions", questions);
+        return new AiResponse(result.toString(), MODEL);
+    }
+
+    private tools.jackson.databind.node.ObjectNode question(String text, String category, String difficulty, List<String> skills) {
+        var node = json.createObjectNode();
+        node.put("question", text);
+        node.put("category", category);
+        node.put("difficulty", difficulty);
+        node.set("skills", json.valueToTree(skills));
+        return node;
+    }
+
+    private AiResponse analysis(AiRequest request) {
         JsonNode resume = PromptTemplateService.section(json, request.user(), PromptTemplateService.RESUME_TAG);
         JsonNode job = PromptTemplateService.section(json, request.user(), PromptTemplateService.JOB_TAG);
 

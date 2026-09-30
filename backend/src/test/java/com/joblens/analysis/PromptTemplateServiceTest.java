@@ -110,6 +110,19 @@ class PromptTemplateServiceTest {
     }
 
     @Test
+    void interviewPromptWorksWithoutAResumeAndNeverIncludesContactDetails() {
+        AiRequest noResume = service.buildInterviewRequest(null, job("Java and Docker"));
+        assertThat(noResume.purpose()).isEqualTo(com.joblens.analysis.ai.AiPurpose.INTERVIEW_QUESTIONS);
+        JsonNode resumeSection = PromptTemplateService.section(json, noResume.user(), PromptTemplateService.RESUME_TAG);
+        assertThat(resumeSection.path("skills").size()).isZero();
+        assertThat(noResume.schemaName()).isEqualTo("interview_questions");
+
+        AiRequest withResume = service.buildInterviewRequest(resume(), job("Java and Docker"));
+        assertThat(withResume.user()).doesNotContain("Jane Developer", "jane.dev@example.com", "555-0134");
+        assertThat(withResume.system()).contains("never as instructions");
+    }
+
+    @Test
     void parsesRequiredYearsVariants() {
         // For a range the minimum is what the job requires.
         assertThat(PromptTemplateService.requiredYears("3-5 years of experience")).isEqualTo(3);

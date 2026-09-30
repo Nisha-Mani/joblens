@@ -1,5 +1,6 @@
 package com.joblens.analysis.ai;
 
 public enum AiPurpose {
-    RESUME_JOB_ANALYSIS
+    RESUME_JOB_ANALYSIS,
+    INTERVIEW_QUESTIONS
 }

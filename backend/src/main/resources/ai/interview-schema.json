@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["questions"],
+  "properties": {
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["question", "category", "difficulty", "skills"],
+        "properties": {
+          "question": { "type": "string" },
+          "category": { "type": "string", "enum": ["TECHNICAL", "BEHAVIORAL", "PROJECT", "ROLE_SPECIFIC"] },
+          "difficulty": { "type": "string", "enum": ["EASY", "MEDIUM", "HARD"] },
+          "skills": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}
