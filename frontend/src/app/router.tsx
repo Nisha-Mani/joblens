@@ -1,20 +1,24 @@
+import { lazy } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { AppLayout } from '../components/layout/AppLayout'
 import { ProtectedRoute } from '../features/auth/ProtectedRoute'
 import { LoginPage, RegisterPage } from '../pages/AuthPages'
-import AnalyticsPage from '../pages/AnalyticsPage'
-import ApplicationDetailPage from '../pages/ApplicationDetailPage'
-import ApplicationsPage from '../pages/ApplicationsPage'
-import DashboardPage from '../pages/DashboardPage'
 import HomePage from '../pages/HomePage'
-import InterviewPrepPage from '../pages/InterviewPrepPage'
-import JobDetailPage from '../pages/JobDetailPage'
-import JobsPage from '../pages/JobsPage'
-import NewApplicationPage from '../pages/NewApplicationPage'
-import NewJobPage from '../pages/NewJobPage'
 import NotFoundPage from '../pages/NotFoundPage'
-import ProfilePage from '../pages/ProfilePage'
-import ResumePage from '../pages/ResumePage'
+
+// The public pages load eagerly; the authenticated app is split into one chunk per page so a first visit
+// to the login screen does not download the dashboard, charts, analysis views and so on.
+const AnalyticsPage = lazy(() => import('../pages/AnalyticsPage'))
+const ApplicationDetailPage = lazy(() => import('../pages/ApplicationDetailPage'))
+const ApplicationsPage = lazy(() => import('../pages/ApplicationsPage'))
+const DashboardPage = lazy(() => import('../pages/DashboardPage'))
+const InterviewPrepPage = lazy(() => import('../pages/InterviewPrepPage'))
+const JobDetailPage = lazy(() => import('../pages/JobDetailPage'))
+const JobsPage = lazy(() => import('../pages/JobsPage'))
+const NewApplicationPage = lazy(() => import('../pages/NewApplicationPage'))
+const NewJobPage = lazy(() => import('../pages/NewJobPage'))
+const ProfilePage = lazy(() => import('../pages/ProfilePage'))
+const ResumePage = lazy(() => import('../pages/ResumePage'))
 
 export function AppRoutes() {
   return (

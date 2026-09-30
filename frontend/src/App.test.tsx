@@ -18,12 +18,14 @@ describe('App routing', () => {
     expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument()
   })
 
-  it('renders the app shell with navigation for authenticated users', () => {
+  it('renders the app shell immediately and the lazily loaded page once its chunk arrives', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse({ status: 500 }, 500))
     storeSession(makeSession())
     renderApp('/analytics')
+    // The shell (navigation) does not wait for the page chunk.
     expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Analytics' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Applications' })).toHaveAttribute('href', '/applications')
+    expect(await screen.findByRole('heading', { name: 'Analytics' })).toBeInTheDocument()
   })
 
   it('shows a not-found page for unknown routes', () => {

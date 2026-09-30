@@ -1,4 +1,6 @@
+import { Suspense } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
+import { Spinner } from '../ui/Spinner'
 import { useAuth } from '../../features/auth/AuthContext'
 import { Button } from '../ui/Button'
 
@@ -40,7 +42,9 @@ export function AppLayout() {
       </aside>
       <main className="flex-1 px-4 py-6 md:px-8">
         <div className="mx-auto max-w-5xl">
-          <Outlet />
+          <Suspense fallback={<Spinner label="Loading…" />}>
+            <Outlet />
+          </Suspense>
         </div>
       </main>
     </div>
