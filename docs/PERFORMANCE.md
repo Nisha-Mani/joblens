@@ -42,12 +42,12 @@ very many rows. That is a known, deliberate simplification.
 
 ## Frontend bundle
 
-The authenticated pages are code-split, one chunk per page (1–3 kB gzipped each). Entry bundle, gzipped:
+The authenticated pages are code-split, one chunk per page (1–3 kB gzipped each). The second measurement also includes replacing the original debug home page with a lighter landing page, so not all of the saving is from splitting. Entry bundle, gzipped:
 
 | | Entry JS (gzip) |
 |---|---|
 | Before code-splitting | 145.4 kB |
-| After | 131.3 kB (about 10% smaller) |
+| After code-splitting and a simpler landing page (final) | 129.5 kB (about 11% smaller) |
 
 The remainder is React, the router, TanStack Query and the form and validation libraries the login screen needs.
 

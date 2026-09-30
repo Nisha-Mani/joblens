@@ -124,8 +124,8 @@ Measured, not estimated:
 
 | | |
 |---|---|
-| Backend | 246 tests; 94.9% line and 85.3% branch coverage |
-| Frontend | 145 tests; 94.7% statement coverage; axe accessibility checks on 15 screens |
+| Backend | 246 tests; 94.4% line and 84.7% branch coverage (the S3 storage class is covered by an opt-in test against a real S3 server, not counted here) |
+| Frontend | 145 tests; 94.9% statement coverage; axe accessibility checks on 15 screens |
 | End to end | 25 Playwright tests, run against dev servers and against the Docker containers, passing five consecutive runs |
 | CI | 6 parallel jobs (backend, frontend, E2E, Docker, Terraform, aggregate) in about 3 minutes |
 

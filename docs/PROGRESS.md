@@ -16,14 +16,15 @@
 - Milestone 11: Docker. Backend and frontend images, nginx reverse proxy on a single origin with security headers, non-root backend, health checks, `docker compose up --build` for the full stack. Verified from a clean state (fresh volumes): all three services healthy, real PDF upload through nginx, 413 on oversized uploads, and the full 25-test Playwright suite passing against the containers. Measured: cold build about 2 minutes; backend image 279 MB, frontend image 50.2 MB.
 - Milestone 12: CI pipeline with five jobs: backend (build, test, JaCoCo summary), frontend (lint, typecheck, coverage, build, bundle-size summary), E2E on dev servers, Docker (build images, start the compose stack, smoke test, full Playwright suite against the containers) and an aggregate "CI passed" check for branch protection. Least-privilege permissions, superseded-PR cancellation, per-job timeouts, artifacts, secrets generated per run and masked. Dependabot for Maven, npm, Actions and Docker (grouped, minor/patch only). Verified on GitHub: all jobs green on main in 3m38s wall-clock.
 - Milestone 13: AWS deployment **prepared, not deployed** (no AWS credentials in this environment). Added S3 file storage behind the existing interface, verified against a real S3-compatible server (MinIO) including the whole app storing and deleting a resume object; Terraform for the main stack (VPC, private RDS with RDS-managed password, S3 buckets, ECR, App Runner, CloudFront with SPA routing and security headers, Secrets Manager) and a bootstrap stack (state bucket, GitHub OIDC, deploy role), both passing `terraform fmt`/`validate` locally and in CI; a manual, CI-gated, OIDC-based deploy workflow that skips when AWS is unconfigured; `docs/DEPLOYMENT.md` with architecture diagram, runbook and a verified/not-verified matrix.
+- Milestone 14: portfolio polish. Real landing page replacing the debug home page; mobile layout fixes found by reviewing phone-sized screenshots; 12 screenshots from a fictional seeded demo (regenerable); API reference generated from OpenAPI (36 operations); ARCHITECTURE with data model and flows; ADR-032 listing deliberate departures from the brief; README, CONTRIBUTING, PERFORMANCE and PORTFOLIO (resume bullets, LinkedIn text, explanations, interview Q&A) written from measured facts; code-splitting; dead-asset removal; full-history secret scan (clean).
 
 ## In Progress
-- Milestone 14: documentation and portfolio polish.
+- Nothing. The roadmap is complete except for the items that need you (below).
 
 ## Tests
 Measured, not estimated:
-- Backend: 246 tests; 94.9% line / 85.3% branch coverage at the last full measurement (JaCoCo, `./mvnw verify`).
-- Frontend: 144 Vitest tests; 94.7% statement / 87.5% branch coverage (`npm run coverage`); axe accessibility checks on 14 screens; production bundle 145 kB gzipped.
+- Backend: 246 tests; 94.4% line / 84.7% branch coverage (JaCoCo, `./mvnw verify`).
+- Frontend: 145 Vitest tests; 94.9% statement / 87.6% branch coverage (`npm run coverage`); axe accessibility checks on 15 screens; entry bundle 129.5 kB gzipped.
 - E2E: 25 Playwright tests, 125/125 passing over five consecutive runs.
 
 ## Known Issues
@@ -34,4 +35,10 @@ Measured, not estimated:
 - Backend tests need a `joblens_test` database (see README).
 
 ## Next
-- Milestone 14: final documentation (README polish, API.md, screenshots, resume bullets, interview notes). **Needs you:** an AWS account and the steps in docs/DEPLOYMENT.md to get a live URL.
+
+Needs you (cannot be done from this environment):
+- **Deploy to AWS** to get a live URL and finish the "deployed" checklist item: follow docs/DEPLOYMENT.md (needs an AWS account; the infrastructure is written and validated but unapplied).
+- **Try the real OpenAI path** once with a key (`AI_PROVIDER=openai`) and record the result; it has only been tested against a stub.
+- **Move the repository out of the iCloud-synced `~/Documents`.** iCloud repeatedly created conflict copies ("file 2.ext") that leaked into one commit and broke two builds.
+- **Choose a license** (none has been added; that is your decision).
+- Review the Dependabot PRs it opens and set branch protection requiring the "CI passed" check.

@@ -11,10 +11,10 @@ React, TypeScript, Java 21, Spring Boot, PostgreSQL, Docker, GitHub Actions, Ter
 
 - Built a full-stack job-search platform covering PDF resume parsing, AI resume/job match analysis, an application tracker with status history, interview preparation and SQL-backed analytics, using React/TypeScript and a Spring Boot modular monolith on PostgreSQL.
 - Designed the AI layer as a replaceable provider interface with schema-validated LLM output (strict types and ranges, bounded retry), PII-minimised prompts, prompt-injection-resistant delimiters and per-user rate limiting; resume parsing itself is deterministic, with AI reserved for semantic analysis.
-- Shipped 416 automated tests (246 backend, 145 frontend, 25 Playwright) at 94.9% backend line coverage, including an authorization sweep over all 36 routes, concurrency tests that exposed and fixed a real race, and axe accessibility checks on 15 screens.
+- Shipped 416 automated tests (246 backend, 145 frontend, 25 Playwright) at 94.4% backend line coverage, including an authorization sweep over all 36 routes, concurrency tests that exposed and fixed a real race, and axe accessibility checks on 15 screens.
 - Containerised with Docker and nginx (279 MB API image, 50 MB web image), built a 6-job GitHub Actions pipeline (about 3 minutes) that runs the full browser suite against the compose stack, and wrote Terraform for an AWS deployment (S3/CloudFront, App Runner, RDS) validated in CI.
 
-Shorter variant: *Built and tested a full-stack job-search platform (React, TypeScript, Spring Boot, PostgreSQL) with schema-validated LLM analysis, JWT auth, SQL analytics, Dockerised delivery and a 6-job CI pipeline; 416 tests, 94.9% backend coverage.*
+Shorter variant: *Built and tested a full-stack job-search platform (React, TypeScript, Spring Boot, PostgreSQL) with schema-validated LLM analysis, JWT auth, SQL analytics, Dockerised delivery and a 6-job CI pipeline; 416 tests, 94.4% backend coverage.*
 
 Measured API latency if asked (local machine, 2,000 applications, one sequential client): list, filter and search endpoints about 9-10 ms p50 and 12 ms p95; the six-query dashboard 15 ms p50 and 19 ms p95.
 
