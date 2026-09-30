@@ -10,7 +10,7 @@ COPY src src
 RUN mvn -B -q package -DskipTests -Djacoco.skip=true
 
 # ---- runtime ----
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 RUN addgroup -S app && adduser -S app -G app && mkdir -p /data/uploads && chown -R app:app /data
 WORKDIR /app
 COPY --from=build /workspace/target/joblens-backend-*.jar app.jar
