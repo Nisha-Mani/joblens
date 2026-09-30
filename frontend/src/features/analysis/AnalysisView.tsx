@@ -19,7 +19,7 @@ function Chips({ items, tone, empty }: { items: string[]; tone: 'good' | 'warn' 
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-2">
-      <h4 className="text-sm font-semibold text-slate-900">{title}</h4>
+      <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
       {children}
     </section>
   )

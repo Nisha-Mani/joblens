@@ -12,7 +12,7 @@ export function ChartCard({ title, description, children, table }: {
 }) {
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-4" aria-label={title}>
-      <h3 className="text-sm font-semibold">{title}</h3>
+      <h2 className="text-sm font-semibold">{title}</h2>
       {description && <p className="mt-0.5 text-xs text-slate-500">{description}</p>}
       <div className="mt-4">{children}</div>
       <details className="mt-4 text-xs text-slate-600">
@@ -89,7 +89,7 @@ export function StatTile({ label, value, hint }: { label: string; value: string 
     <div className="rounded-lg border border-slate-200 bg-white p-4">
       <dt className="text-sm text-slate-600">{label}</dt>
       <dd className="mt-1 text-2xl font-semibold tabular-nums">{value}</dd>
-      {hint && <p className="mt-0.5 text-xs text-slate-500">{hint}</p>}
+      {hint && <dd className="mt-0.5 text-xs text-slate-500">{hint}</dd>}
     </div>
   )
 }

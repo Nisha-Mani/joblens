@@ -54,7 +54,7 @@ export default function DashboardPage() {
 
             <div className="grid gap-4 lg:grid-cols-2">
               <section aria-labelledby="upcoming-heading" className="rounded-lg border border-slate-200 bg-white p-4">
-                <h3 id="upcoming-heading" className="text-sm font-semibold">Upcoming interviews</h3>
+                <h2 id="upcoming-heading" className="text-sm font-semibold">Upcoming interviews</h2>
                 {upcomingInterviews.length === 0
                   ? <p className="mt-3 text-sm text-slate-600">No interviews scheduled. Add an interview date to an application and it will appear here.</p>
                   : <ul className="mt-3 divide-y divide-slate-100 text-sm">
@@ -67,7 +67,7 @@ export default function DashboardPage() {
                     </ul>}
               </section>
               <section aria-labelledby="recent-heading" className="rounded-lg border border-slate-200 bg-white p-4">
-                <h3 id="recent-heading" className="text-sm font-semibold">Recent applications</h3>
+                <h2 id="recent-heading" className="text-sm font-semibold">Recent applications</h2>
                 <ul className="mt-3 divide-y divide-slate-100 text-sm">
                   {recentApplications.map((a) => (
                     <li key={a.applicationId} className="flex items-center justify-between gap-3 py-2">
