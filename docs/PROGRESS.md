@@ -15,13 +15,14 @@
 - Milestone 10: quality pass. Found and fixed a real race (concurrent skill adds returned 500s; now `INSERT ... ON CONFLICT`). Added an authorization sweep that discovers every route and proves anonymous access is rejected, robustness tests (malformed/oversized/wrong-type input, no stack-trace leaks, security headers, CORS), concurrency tests (registration, applications, resume versions, skills), storage path-traversal tests, an error boundary, axe accessibility checks on 14 screens (fixed heading-order and definition-list issues), session-expiry E2E, coverage tooling, and removed unused dependencies (Lombok, Recharts). Whole E2E suite verified deterministic over 5 consecutive runs.
 - Milestone 11: Docker. Backend and frontend images, nginx reverse proxy on a single origin with security headers, non-root backend, health checks, `docker compose up --build` for the full stack. Verified from a clean state (fresh volumes): all three services healthy, real PDF upload through nginx, 413 on oversized uploads, and the full 25-test Playwright suite passing against the containers. Measured: cold build about 2 minutes; backend image 279 MB, frontend image 50.2 MB.
 - Milestone 12: CI pipeline with five jobs: backend (build, test, JaCoCo summary), frontend (lint, typecheck, coverage, build, bundle-size summary), E2E on dev servers, Docker (build images, start the compose stack, smoke test, full Playwright suite against the containers) and an aggregate "CI passed" check for branch protection. Least-privilege permissions, superseded-PR cancellation, per-job timeouts, artifacts, secrets generated per run and masked. Dependabot for Maven, npm, Actions and Docker (grouped, minor/patch only). Verified on GitHub: all jobs green on main in 3m38s wall-clock.
+- Milestone 13: AWS deployment **prepared, not deployed** (no AWS credentials in this environment). Added S3 file storage behind the existing interface, verified against a real S3-compatible server (MinIO) including the whole app storing and deleting a resume object; Terraform for the main stack (VPC, private RDS with RDS-managed password, S3 buckets, ECR, App Runner, CloudFront with SPA routing and security headers, Secrets Manager) and a bootstrap stack (state bucket, GitHub OIDC, deploy role), both passing `terraform fmt`/`validate` locally and in CI; a manual, CI-gated, OIDC-based deploy workflow that skips when AWS is unconfigured; `docs/DEPLOYMENT.md` with architecture diagram, runbook and a verified/not-verified matrix.
 
 ## In Progress
-- Milestone 13: AWS deployment.
+- Milestone 14: documentation and portfolio polish.
 
 ## Tests
 Measured, not estimated:
-- Backend: 241 tests; 94.9% line / 85.3% branch coverage (JaCoCo, `./mvnw verify`).
+- Backend: 246 tests; 94.9% line / 85.3% branch coverage at the last full measurement (JaCoCo, `./mvnw verify`).
 - Frontend: 144 Vitest tests; 94.7% statement / 87.5% branch coverage (`npm run coverage`); axe accessibility checks on 14 screens; production bundle 145 kB gzipped.
 - E2E: 25 Playwright tests, 125/125 passing over five consecutive runs.
 
@@ -33,4 +34,4 @@ Measured, not estimated:
 - Backend tests need a `joblens_test` database (see README).
 
 ## Next
-- Milestone 13: prepare AWS deployment (S3 + CloudFront, App Runner/ECS, RDS, Secrets Manager). Deployment credentials are not available in this environment, so this will be configuration and documentation only, without claiming a live deployment.
+- Milestone 14: final documentation (README polish, API.md, screenshots, resume bullets, interview notes). **Needs you:** an AWS account and the steps in docs/DEPLOYMENT.md to get a live URL.

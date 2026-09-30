@@ -29,3 +29,7 @@ flowchart TD
 ## Current state
 
 Foundation only: health/ping endpoints, stateless security config with CORS, baseline migration, and a React shell that verifies backend connectivity. Feature modules are added milestone by milestone (see [docs/PROGRESS.md](docs/PROGRESS.md)).
+
+## Deployment
+
+Locally the stack runs with Docker Compose (nginx, API, PostgreSQL). The AWS target is S3 + CloudFront for the web app, App Runner for the API, RDS PostgreSQL, S3 for uploads and Secrets Manager for secrets. The design, runbook and an honest list of what has and has not been verified are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).

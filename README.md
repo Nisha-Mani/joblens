@@ -73,5 +73,6 @@ cd e2e && npm install && npx playwright install chromium && npx playwright test 
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) – system design
 - [DECISIONS.md](DECISIONS.md) – architecture decision records
+- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) – AWS architecture and runbook (prepared, not yet deployed)
 - [SECURITY.md](SECURITY.md) – security model and reporting
 - [CONTRIBUTING.md](CONTRIBUTING.md) – workflow and conventions
