@@ -14,9 +14,10 @@
 - Milestone 9: SQL-backed dashboard/analytics endpoint (totals, response/interview/offer rates from status history, status distribution, zero-filled monthly series, upcoming interviews, recent applications, top missing skills), Dashboard and Analytics pages with accessible charts, table fallbacks, empty states, E2E against real data and a visual check.
 - Milestone 10: quality pass. Found and fixed a real race (concurrent skill adds returned 500s; now `INSERT ... ON CONFLICT`). Added an authorization sweep that discovers every route and proves anonymous access is rejected, robustness tests (malformed/oversized/wrong-type input, no stack-trace leaks, security headers, CORS), concurrency tests (registration, applications, resume versions, skills), storage path-traversal tests, an error boundary, axe accessibility checks on 14 screens (fixed heading-order and definition-list issues), session-expiry E2E, coverage tooling, and removed unused dependencies (Lombok, Recharts). Whole E2E suite verified deterministic over 5 consecutive runs.
 - Milestone 11: Docker. Backend and frontend images, nginx reverse proxy on a single origin with security headers, non-root backend, health checks, `docker compose up --build` for the full stack. Verified from a clean state (fresh volumes): all three services healthy, real PDF upload through nginx, 413 on oversized uploads, and the full 25-test Playwright suite passing against the containers. Measured: cold build about 2 minutes; backend image 279 MB, frontend image 50.2 MB.
+- Milestone 12: CI pipeline with five jobs: backend (build, test, JaCoCo summary), frontend (lint, typecheck, coverage, build, bundle-size summary), E2E on dev servers, Docker (build images, start the compose stack, smoke test, full Playwright suite against the containers) and an aggregate "CI passed" check for branch protection. Least-privilege permissions, superseded-PR cancellation, per-job timeouts, artifacts, secrets generated per run and masked. Dependabot for Maven, npm, Actions and Docker (grouped, minor/patch only). Verified on GitHub: all jobs green on main in 3m38s wall-clock.
 
 ## In Progress
-- Milestone 12: GitHub Actions CI/CD.
+- Milestone 13: AWS deployment.
 
 ## Tests
 Measured, not estimated:
@@ -32,4 +33,4 @@ Measured, not estimated:
 - Backend tests need a `joblens_test` database (see README).
 
 ## Next
-- Milestone 12: CI already builds and tests everything; add lint/coverage reporting, Docker image builds and a separate deploy workflow.
+- Milestone 13: prepare AWS deployment (S3 + CloudFront, App Runner/ECS, RDS, Secrets Manager). Deployment credentials are not available in this environment, so this will be configuration and documentation only, without claiming a live deployment.
