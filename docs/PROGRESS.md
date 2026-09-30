@@ -5,17 +5,18 @@
 - Milestone 1: backend global error handling (RFC 7807), OpenAPI/Swagger UI, 401 for unauthenticated requests; frontend routing, app layout and navigation, API client (problem-detail parsing, token hook, 401 handling), shared UI primitives (loading, error, empty states, accessible form field), RHF + Zod validation pattern.
 
 - Milestone 2: registration, login (BCrypt), JWT issue/validation, USER/ADMIN roles, protected APIs and routes, logout, expiry handling, Playwright E2E for the auth flow.
+- Milestone 3: profile (upsert) and skills (shared catalog + per-user proficiency) with Flyway V3, DTOs, user-scoped authorization, suggestions endpoint, Profile page, E2E persistence test.
 
 ## In Progress
-- Milestone 3: user profile and skills.
+- Milestone 4: resume upload and parsing.
 
 ## Tests
-- Backend: 26 tests (auth integration incl. invalid/expired/tampered JWT and roles, JWT config, error handler, health).
-- Frontend: 20 Vitest tests (API client, forms, routing, auth flow).
-- E2E: 4 Playwright tests (redirect, register/logout/login, wrong password, duplicate email).
+- Backend: 37 tests (auth incl. invalid/expired/tampered JWT and roles, profile/skills incl. cross-user isolation, error handler, health).
+- Frontend: 27 Vitest tests (API client, forms, routing, auth flow, profile page).
+- E2E: 5 Playwright tests (auth flows, profile and skills persistence).
 
 ## Known Issues
 - Backend tests need a `joblens_test` database (see README).
 
 ## Next
-- Milestone 3: UserProfile, Skill, UserSkill with migrations, DTOs and authorization.
+- Milestone 4: PDF upload, validation, text extraction, parsing, versioning, edit, delete.
