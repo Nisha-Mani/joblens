@@ -210,11 +210,30 @@ jobs:
         if: always()
         run: docker compose down -v
 
+  infra:
+    name: Infrastructure (terraform fmt and validate)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+      - name: Check both stacks
+        run: |
+          for dir in infra/terraform infra/bootstrap; do
+            echo "::group::$dir"
+            terraform -chdir="$dir" fmt -check -recursive -diff
+            terraform -chdir="$dir" init -backend=false -input=false
+            terraform -chdir="$dir" validate
+            echo "::endgroup::"
+          done
+
   # One stable check to require in branch protection instead of listing every job.
   ci-ok:
     name: CI passed
     if: always()
-    needs: [backend, frontend, e2e, docker]
+    needs: [backend, frontend, e2e, docker, infra]
     runs-on: ubuntu-latest
     steps:
       - name: Require every job to have succeeded
