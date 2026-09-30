@@ -6,17 +6,19 @@
 
 - Milestone 2: registration, login (BCrypt), JWT issue/validation, USER/ADMIN roles, protected APIs and routes, logout, expiry handling, Playwright E2E for the auth flow.
 - Milestone 3: profile (upsert) and skills (shared catalog + per-user proficiency) with Flyway V3, DTOs, user-scoped authorization, suggestions endpoint, Profile page, E2E persistence test.
+- Milestone 4: PDF upload with layered validation, PDFBox text extraction, deterministic parser, per-user versioning, editable parsed data, delete (row + file), Resume page, E2E with a real PDF fixture.
 
 ## In Progress
-- Milestone 4: resume upload and parsing.
+- Milestone 5: jobs module.
 
 ## Tests
-- Backend: 37 tests (auth incl. invalid/expired/tampered JWT and roles, profile/skills incl. cross-user isolation, error handler, health).
-- Frontend: 27 Vitest tests (API client, forms, routing, auth flow, profile page).
-- E2E: 5 Playwright tests (auth flows, profile and skills persistence).
+- Backend: 65 tests (auth, profile/skills, resume upload/validation/isolation, parser, PDF extraction, error handler, health).
+- Frontend: 45 Vitest tests (API client, forms, routing, auth, profile, resume).
+- E2E: 7 Playwright tests (auth, profile, resume upload/edit/delete and rejection).
 
 ## Known Issues
+- Resume parsing is heuristic: unusual layouts may yield missing or merged entries (users can correct them). Scanned/image-only PDFs are rejected (no OCR).
 - Backend tests need a `joblens_test` database (see README).
 
 ## Next
-- Milestone 4: PDF upload, validation, text extraction, parsing, versioning, edit, delete.
+- Milestone 5: jobs CRUD with server-side search, filter, sort and pagination.

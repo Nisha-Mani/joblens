@@ -10,6 +10,14 @@ JobLens is a portfolio project under development; it has not been independently 
 - Sensitive data (passwords, tokens, resume content, API keys) must not be logged.
 - The OpenAI key is only ever used server-side.
 
+## File uploads
+
+- Only PDFs are accepted: declared content type, `.pdf` extension and the `%PDF-` file signature are all checked, because the declared type is client-controlled.
+- Size is capped (default 5 MB, `MAX_UPLOAD_MB`) both by the servlet container and in the service; PDFs over 10 pages, encrypted PDFs and PDFs without extractable text are rejected with clear messages.
+- Stored under generated UUID keys; client file names are sanitised (path and control characters removed) and only kept as display metadata.
+- Every resume lookup is scoped to the authenticated user, so another user's resume id returns 404.
+- Resume text and parsed content are not written to logs.
+
 ## Reporting
 
 Open a private security advisory on the GitHub repository, or contact the maintainer directly.

@@ -26,3 +26,12 @@ JobLens owns its users, so email/password with app-issued JWTs keeps the system 
 
 ## ADR-009: Session stored in localStorage
 The SPA keeps the access token and its expiry in `localStorage`, clears it on logout, on expiry (timer) and whenever the API answers 401 to an authenticated request. Tradeoff: any XSS could read the token, whereas an httpOnly cookie cannot be read by scripts but then needs CSRF protection. For this MVP the simpler model is accepted; moving to httpOnly cookies plus refresh tokens is a documented future improvement.
+
+## ADR-010: Deterministic resume parsing, AI only for analysis
+Text is extracted with Apache PDFBox and parsed by a rule-based `ResumeParser` (regexes for contact details, heading detection for sections, a dictionary of known technologies). It is free, fast, testable and predictable; the parser sits behind an interface so it can be swapped or augmented later. Parsed data is always shown to the user for correction, because heuristics will sometimes be wrong. The LLM is reserved for semantic comparison of resume and job.
+
+## ADR-011: File storage behind an interface
+`FileStorage` has a local-disk implementation now; an S3 implementation replaces it at deployment without touching resume logic. Files are stored under server-generated UUID keys, never client-supplied names, and the local implementation refuses keys that resolve outside its root.
+
+## ADR-012: Resume versions and JSONB parsed data
+Each upload creates a new version per user (unique on user and version, conflicts surface as a retryable 409). The parsed result is a JSONB document because it is read and replaced as a whole; the original extracted text is stored separately and never returned by the API.
