@@ -8,7 +8,6 @@ import com.joblens.profile.dto.SkillSuggestion;
 import com.joblens.profile.dto.UserSkillResponse;
 import java.util.List;
 import java.util.UUID;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,14 +49,15 @@ public class ProfileService {
             .map(UserSkillResponse::from).toList();
     }
 
-    /** Adds the skill, or updates its proficiency if the user already has it. */
+    /** Adds the skill, or updates its proficiency if the user already has it. Safe under concurrent calls. */
     @Transactional
     public UserSkillResponse addOrUpdateSkill(UUID userId, SkillRequest request) {
-        Skill skill = findOrCreateSkill(request.name().trim(), request.category());
-        UserSkill userSkill = userSkills.findById(new UserSkillId(userId, skill.getId()))
-            .orElseGet(() -> new UserSkill(userId, skill, request.proficiency()));
-        userSkill.setProficiency(request.proficiency());
-        return UserSkillResponse.from(userSkills.save(userSkill));
+        String name = request.name().trim();
+        SkillCategory category = request.category() != null ? request.category() : SkillCategory.OTHER;
+        skills.insertIfAbsent(name, category.name());
+        Skill skill = skills.findByNameIgnoreCase(name).orElseThrow();
+        userSkills.upsert(userId, skill.getId(), request.proficiency().name());
+        return new UserSkillResponse(skill.getId(), skill.getName(), skill.getCategory(), request.proficiency());
     }
 
     @Transactional
@@ -77,18 +77,6 @@ public class ProfileService {
         }
         return skills.searchByPrefix(escapeLike(trimmed), PageRequest.of(0, MAX_SUGGESTIONS)).stream()
             .map(SkillSuggestion::from).toList();
-    }
-
-    private Skill findOrCreateSkill(String name, SkillCategory category) {
-        return skills.findByNameIgnoreCase(name).orElseGet(() -> {
-            try {
-                return skills.saveAndFlush(
-                    new Skill(name, category != null ? category : SkillCategory.OTHER));
-            } catch (DataIntegrityViolationException e) {
-                // Another request created the same skill concurrently.
-                return skills.findByNameIgnoreCase(name).orElseThrow(() -> e);
-            }
-        });
     }
 
     private static String blankToNull(String value) {
