@@ -34,8 +34,15 @@ class JobLensApplicationTests {
     }
 
     @Test
+    void openApiDocsArePublic() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.info.title").value("JobLens API"));
+    }
+
+    @Test
     void otherEndpointsRequireAuthentication() throws Exception {
         mockMvc.perform(get("/api/anything"))
-            .andExpect(status().isForbidden());
+            .andExpect(status().isUnauthorized());
     }
 }
