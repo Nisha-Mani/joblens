@@ -67,4 +67,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             "The file is too large. Maximum size is " + maxUploadMb + " MB.");
         return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).body(problem);
     }
+
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(
+            org.springframework.beans.TypeMismatchException ex, HttpHeaders headers,
+            HttpStatusCode status, WebRequest request) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+            "Invalid value for parameter '" + ex.getPropertyName() + "'");
+        return ResponseEntity.badRequest().body(problem);
+    }
 }
