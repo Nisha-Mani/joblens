@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["overallScore", "matchingSkills", "missingSkills", "keywordGaps",
+               "experienceAssessment", "suggestions", "interviewTopics"],
+  "properties": {
+    "overallScore": { "type": "integer" },
+    "matchingSkills": { "type": "array", "items": { "type": "string" } },
+    "missingSkills": { "type": "array", "items": { "type": "string" } },
+    "keywordGaps": { "type": "array", "items": { "type": "string" } },
+    "experienceAssessment": { "type": "string" },
+    "suggestions": { "type": "array", "items": { "type": "string" } },
+    "interviewTopics": { "type": "array", "items": { "type": "string" } }
+  }
+}

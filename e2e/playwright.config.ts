@@ -27,6 +27,8 @@ export default defineConfig({
         SERVER_PORT: String(backendPort),
         DB_URL: process.env.E2E_DB_URL ?? 'jdbc:postgresql://localhost:5432/joblens_e2e',
         CORS_ALLOWED_ORIGINS: `http://localhost:${frontendPort}`,
+        AI_PROVIDER: 'mock', // never call a paid API from tests
+        ANALYSIS_RATE_LIMIT_PER_HOUR: '1000',
         JWT_SECRET: process.env.JWT_SECRET ?? 'e2e-only-secret-key-0123456789-abcdefghij',
         POSTGRES_USER: process.env.POSTGRES_USER ?? 'joblens',
         POSTGRES_PASSWORD: process.env.POSTGRES_PASSWORD ?? '',

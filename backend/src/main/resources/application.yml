@@ -27,6 +27,14 @@ management:
         enabled: true
 
 app:
+  ai:
+    provider: ${AI_PROVIDER:mock}
+    api-key: ${OPENAI_API_KEY:}
+    model: ${OPENAI_MODEL:gpt-4o-mini}
+    base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+    timeout-seconds: ${AI_TIMEOUT_SECONDS:30}
+    max-output-tokens: ${AI_MAX_OUTPUT_TOKENS:1500}
+    rate-limit-per-hour: ${ANALYSIS_RATE_LIMIT_PER_HOUR:20}
   storage:
     local-dir: ${STORAGE_LOCAL_DIR:./data/uploads}
   jwt:
