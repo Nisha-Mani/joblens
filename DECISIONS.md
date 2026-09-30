@@ -74,3 +74,9 @@ Technical and role-specific questions come from the job description alone, so ge
 
 ## ADR-025: Plain HTML/CSS charts with a table fallback
 The dashboard's charts are single-series bars, so they are drawn with semantic HTML and CSS instead of a charting library: smaller bundle, trivial to test, and accessible by construction (every bar is directly labelled, charts expose an accessible summary, and each has a "view data as table" alternative). One hue per chart (blue for volume, orange for gaps) rather than a colour per status, so meaning never depends on colour alone. A library such as Recharts remains the right choice if interactive multi-series charts are added.
+
+## ADR-026: nginx serves the SPA and proxies the API on one origin
+The frontend image is a static build behind nginx, which also reverse-proxies `/api`. The browser therefore uses one origin: no CORS surface in production, and no API URL is baked into the JavaScript bundle, so the same image runs anywhere. The backend is not published to the host. Security headers and a Content-Security-Policy are set at the edge; hashed assets are cached for a year while the app shell is always revalidated. (`add_header` inside a `location` discards all inherited `add_header` directives, so locations use `expires` instead. This was caught by checking the headers on a running container, not by reading the config.)
+
+## ADR-027: Small, non-root, health-checked images
+The backend is a multi-stage build (Maven → JRE-only Alpine image) that runs as an unprivileged user, caches dependency resolution in its own layer, and reports readiness through Spring's readiness probe; the frontend is Node → nginx. Compose starts services in dependency order using those health checks and keeps secrets out of the file: every secret is a `${VAR}` reference with a required-variable check, supplied from the shell or a git-ignored `.env`. Measured sizes: backend 279 MB, frontend 50.2 MB.

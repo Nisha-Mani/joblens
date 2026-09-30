@@ -17,7 +17,23 @@ JobLens helps software engineers understand how their experience aligns with job
 | Testing | JUnit 5, Spring Boot Test, Vitest, React Testing Library, Playwright |
 | DevOps | Docker, Docker Compose, GitHub Actions, AWS |
 
-## Local setup
+## Run everything with Docker
+
+```bash
+cp .env.example .env            # set POSTGRES_PASSWORD and JWT_SECRET (openssl rand -hex 32)
+docker compose up --build       # PostgreSQL + API + web app
+open http://localhost:8080      # override with FRONTEND_PORT
+```
+
+Only the web app is published. nginx serves the built SPA and proxies `/api` (and `/v3/api-docs`, `/swagger-ui`) to the backend, so the browser talks to a single origin. AI runs on the free mock provider unless you set `AI_PROVIDER=openai` and `OPENAI_API_KEY`. Uploaded resumes live in the `uploads` volume and the database in `pgdata`; `docker compose down -v` deletes both.
+
+The same browser tests that run in development can be pointed at the containers:
+
+```bash
+cd e2e && E2E_BASE_URL=http://localhost:8080 E2E_API_URL=http://localhost:8080 npx playwright test
+```
+
+## Local development setup
 
 Prerequisites: JDK 21+, Node 20+, Docker.
 
