@@ -40,8 +40,8 @@ jobs:
       POSTGRES_PASSWORD: ci-test-password
       TEST_DB_URL: jdbc:postgresql://localhost:5432/joblens_test
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
@@ -62,7 +62,7 @@ jobs:
                   return f"{100 * c / (m + c):.1f}%"
               print(f"### Backend coverage\nLine **{pct('LINE')}** · Branch **{pct('BRANCH')}**")
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: backend-reports
@@ -77,8 +77,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -103,7 +103,7 @@ jobs:
               echo "- \`$(basename "$f")\`: $(du -k "$f" | cut -f1) kB ($(gzip -c "$f" | wc -c | awk '{printf "%.0f", $1/1024}') kB gzipped)"
             done
           } >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: frontend-coverage
@@ -131,13 +131,13 @@ jobs:
       POSTGRES_PASSWORD: ci-test-password
       JWT_SECRET: ci-e2e-only-secret-key-0123456789-abcdef
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
           cache: maven
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -152,7 +152,7 @@ jobs:
         working-directory: e2e
       - run: npx playwright test
         working-directory: e2e
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-report-dev
@@ -166,7 +166,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Generate throwaway secrets for this run
         run: |
           pw=$(openssl rand -hex 16); jwt=$(openssl rand -hex 32)
@@ -181,7 +181,7 @@ jobs:
           curl -fsS http://localhost:8080/api/ping
           test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/api/jobs)" = "401"
           curl -sI http://localhost:8080/ | grep -i '^x-content-type-options: nosniff'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -215,8 +215,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
+      - uses: actions/checkout@v7
+      - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: "1.9.8"
       - name: Check both stacks
