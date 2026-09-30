@@ -41,7 +41,7 @@ jobs:
       TEST_DB_URL: jdbc:postgresql://localhost:5432/joblens_test
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
@@ -132,7 +132,7 @@ jobs:
       JWT_SECRET: ci-e2e-only-secret-key-0123456789-abcdef
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
