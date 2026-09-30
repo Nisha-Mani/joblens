@@ -2,8 +2,10 @@ import { Route, Routes } from 'react-router-dom'
 import { AppLayout } from '../components/layout/AppLayout'
 import { ProtectedRoute } from '../features/auth/ProtectedRoute'
 import { LoginPage, RegisterPage } from '../pages/AuthPages'
+import AnalyticsPage from '../pages/AnalyticsPage'
 import ApplicationDetailPage from '../pages/ApplicationDetailPage'
 import ApplicationsPage from '../pages/ApplicationsPage'
+import DashboardPage from '../pages/DashboardPage'
 import HomePage from '../pages/HomePage'
 import InterviewPrepPage from '../pages/InterviewPrepPage'
 import JobDetailPage from '../pages/JobDetailPage'
@@ -13,12 +15,6 @@ import NewJobPage from '../pages/NewJobPage'
 import NotFoundPage from '../pages/NotFoundPage'
 import ProfilePage from '../pages/ProfilePage'
 import ResumePage from '../pages/ResumePage'
-import PlaceholderPage from '../pages/PlaceholderPage'
-
-const sections = [
-  { path: 'dashboard', title: 'Dashboard', description: 'Your job search at a glance will appear here.' },
-  { path: 'analytics', title: 'Analytics', description: 'Understand your job search progress over time.' },
-]
 
 export function AppRoutes() {
   return (
@@ -28,13 +24,8 @@ export function AppRoutes() {
       <Route path="/register" element={<RegisterPage />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          {sections.map((s) => (
-            <Route
-              key={s.path}
-              path={s.path}
-              element={<PlaceholderPage title={s.title} description={s.description} />}
-            />
-          ))}
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="resume" element={<ResumePage />} />
           <Route path="applications" element={<ApplicationsPage />} />
           <Route path="applications/new" element={<NewApplicationPage />} />
