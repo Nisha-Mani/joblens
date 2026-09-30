@@ -10,14 +10,15 @@
 - Milestone 5: jobs CRUD with JPA-Specification search, employment-type filter, whitelisted sorting, server-side pagination (size capped, stable ordering), URL-driven list UI, create/edit/detail/delete, user isolation.
 - Milestone 6: applications with 7 statuses, applied/interview dates, notes, status history table, inline status change, search/filter/sort (nulls last)/pagination, per-job tracking from the job page, user isolation, cascade with jobs.
 - Milestone 7: AI analysis pipeline (prompt templates with PII stripping and size budgets, `AiClient` with mock and OpenAI implementations, strict response validation, single retry on unusable output, timeout/throttle/outage/missing-key handling, per-user rate limit, no transaction held during the call), persistence (Flyway V7), job-page UI, E2E on the mock provider. The real OpenAI path is verified against a local stub server and boots cleanly without a key; it has not been exercised against the live API (no key available).
+- Milestone 8: interview question generation (technical, behavioral, project, role-specific; difficulty; related skills) on the shared AI pipeline, additive/deduplicated generation, custom questions, per-question notes and preparation status, server-side filter/pagination, Interview prep page, E2E on the mock provider.
 
 ## In Progress
-- Milestone 8: interview preparation.
+- Milestone 9: dashboard and analytics.
 
 ## Tests
-- Backend: 174 tests (auth, profile/skills, resume, jobs, applications, AI parser/prompt/client/rate limiter/failure handling/full pipeline, error handler, health).
-- Frontend: 99 Vitest tests.
-- E2E: 16 Playwright tests (auth, profile, resume, jobs, applications, AI analysis on the mock provider, cross-user access), verified stable over repeated runs.
+- Backend: 201 tests (auth, profile/skills, resume, jobs, applications, AI parser/prompt/client/rate limiter/failure handling, interview generation and prep, error handler, health).
+- Frontend: 114 Vitest tests.
+- E2E: 19 Playwright tests (auth, profile, resume, jobs, applications, AI analysis, interview prep, cross-user access), verified stable over repeated runs.
 
 ## Known Issues
 - The live OpenAI integration has only been tested against a stub; a real-key smoke test is still to do.
@@ -27,4 +28,4 @@
 - Backend tests need a `joblens_test` database (see README).
 
 ## Next
-- Milestone 8: generate and store interview questions (reusing the AI infrastructure) with notes and preparation status.
+- Milestone 9: SQL-backed dashboard metrics and charts (real data only, empty states).

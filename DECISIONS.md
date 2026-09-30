@@ -59,3 +59,12 @@ All model access goes through `AiClient`. Implementations: `OpenAiClient` (Chat 
 
 ## ADR-020: Per-user rate limit, in memory
 `AnalysisRateLimiter` caps analyses per user per hour (default 20) to bound cost and abuse. It is a sliding window kept in memory: simple and dependency-free, but per application instance and reset on restart. Running several instances would need a shared store (for example Redis or a database counter); that trade-off is accepted until there is more than one instance.
+
+## ADR-021: Interview questions belong to a job, generation is additive
+Questions are stored per job (the original sketch tied them to an analysis, but preparation is about the role, and users prepare for jobs they may never analyse). Generating again adds only questions not already present (compared case- and whitespace-insensitively), so notes and progress on existing questions are never overwritten. Users can also write their own questions; generated ones are flagged so the UI and future analytics can tell them apart.
+
+## ADR-022: One AI pipeline for every AI feature
+`AiPipeline` owns the "call the model, validate the output, retry once on unusable output" behaviour; `AiJson` owns tolerant JSON extraction. Analysis and interview generation only supply a prompt and a validating parser. Adding a third AI feature means a prompt, a schema and a parser, not another copy of the failure handling. The per-user rate limit covers all AI requests combined.
+
+## ADR-023: A resume is optional for interview questions
+Technical and role-specific questions come from the job description alone, so generation works before a resume is uploaded; a resume sharpens the project questions. Analysis, which is inherently a comparison, still requires one.
