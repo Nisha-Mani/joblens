@@ -7,6 +7,7 @@ const navItems = [
   { to: '/resume', label: 'Resume' },
   { to: '/jobs', label: 'Jobs' },
   { to: '/applications', label: 'Applications' },
+  { to: '/interview-prep', label: 'Interview prep' },
   { to: '/analytics', label: 'Analytics' },
   { to: '/profile', label: 'Profile' },
 ]

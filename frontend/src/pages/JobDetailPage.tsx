@@ -104,6 +104,9 @@ export default function JobDetailPage() {
         )}
       </section>
       <AnalysisPanel jobId={id} />
+      <p className="text-sm">
+        <Link className="font-medium underline" to={`/interview-prep?jobId=${id}`}>Prepare for the interview</Link>
+      </p>
       <section aria-labelledby="description-heading">
         <h2 id="description-heading" className="mb-2 text-lg font-semibold">Job description</h2>
         <div className="whitespace-pre-wrap rounded-lg border border-slate-200 bg-white p-4 text-sm leading-relaxed">

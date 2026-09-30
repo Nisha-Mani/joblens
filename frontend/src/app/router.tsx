@@ -5,6 +5,7 @@ import { LoginPage, RegisterPage } from '../pages/AuthPages'
 import ApplicationDetailPage from '../pages/ApplicationDetailPage'
 import ApplicationsPage from '../pages/ApplicationsPage'
 import HomePage from '../pages/HomePage'
+import InterviewPrepPage from '../pages/InterviewPrepPage'
 import JobDetailPage from '../pages/JobDetailPage'
 import JobsPage from '../pages/JobsPage'
 import NewApplicationPage from '../pages/NewApplicationPage'
@@ -38,6 +39,7 @@ export function AppRoutes() {
           <Route path="applications" element={<ApplicationsPage />} />
           <Route path="applications/new" element={<NewApplicationPage />} />
           <Route path="applications/:id" element={<ApplicationDetailPage />} />
+          <Route path="interview-prep" element={<InterviewPrepPage />} />
           <Route path="jobs" element={<JobsPage />} />
           <Route path="jobs/new" element={<NewJobPage />} />
           <Route path="jobs/:id" element={<JobDetailPage />} />
