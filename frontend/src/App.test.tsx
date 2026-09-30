@@ -5,17 +5,21 @@ import { jsonResponse, makeSession, renderApp, storeSession } from './test/utils
 describe('App routing', () => {
   afterEach(() => vi.restoreAllMocks())
 
-  it('home shows connected state when the API responds', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse({ status: 'ok', service: 'joblens-api' }))
+  it('shows a landing page with clear calls to action for visitors', () => {
     renderApp('/')
-    expect(await screen.findByText(/connected to joblens-api/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/how your experience fits every job/i)
+    expect(screen.getByRole('link', { name: 'Create a free account' })).toHaveAttribute('href', '/register')
+    expect(screen.getAllByRole('link', { name: 'Sign in' })[0]).toHaveAttribute('href', '/login')
+    expect(screen.getByRole('heading', { name: 'Resume match analysis' })).toBeInTheDocument()
+    // The landing page makes no API calls and shows no debug output.
+    expect(screen.queryByText(/api status/i)).not.toBeInTheDocument()
   })
 
-  it('home shows a retryable error when the API is unreachable', async () => {
-    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('network'))
+  it('offers signed-in users a way straight back into the app', () => {
+    storeSession(makeSession())
     renderApp('/')
-    expect(await screen.findByRole('alert')).toHaveTextContent(/backend unreachable/i)
-    expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: 'Open dashboard' })[0]).toHaveAttribute('href', '/dashboard')
+    expect(screen.queryByRole('link', { name: 'Create a free account' })).not.toBeInTheDocument()
   })
 
   it('renders the app shell immediately and the lazily loaded page once its chunk arrives', async () => {

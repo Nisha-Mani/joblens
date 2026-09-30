@@ -60,6 +60,7 @@ function mockApi() {
 }
 
 const SCREENS: [string, string, string | RegExp][] = [
+  ['landing', '/', 'Everything for the search, in one place'],
   ['login', '/login', 'Sign in'],
   ['register', '/register', 'Create your account'],
   ['dashboard', '/dashboard', 'Applications by status'],
@@ -84,7 +85,7 @@ describe('accessibility (axe)', () => {
 
   it.each(SCREENS)('%s has no detectable violations', async (_name, path, waitFor_) => {
     // Sign-in and registration are only reachable when logged out; everything else needs a session.
-    if (path !== '/login' && path !== '/register') storeSession(makeSession())
+    if (path !== '/' && path !== '/login' && path !== '/register') storeSession(makeSession())
     const { container, findAllByText } = renderApp(path)
     const text = typeof waitFor_ === 'string' && waitFor_.includes('|') ? new RegExp(waitFor_) : waitFor_
     await waitFor(async () => expect((await findAllByText(text)).length).toBeGreaterThan(0))
