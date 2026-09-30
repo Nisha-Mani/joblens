@@ -13,6 +13,8 @@ public interface ResumeRepository extends JpaRepository<Resume, UUID> {
 
     Optional<Resume> findByIdAndUserId(UUID id, UUID userId);
 
+    Optional<Resume> findFirstByUserIdOrderByVersionDesc(UUID userId);
+
     @Query("select coalesce(max(r.version), 0) from Resume r where r.userId = :userId")
     int findMaxVersion(@Param("userId") UUID userId);
 }

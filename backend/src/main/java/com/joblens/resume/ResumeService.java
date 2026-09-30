@@ -52,6 +52,13 @@ public class ResumeService {
         return ResumeDetail.from(resume, read(resume));
     }
 
+    /** The user's newest resume version, if they have uploaded one. */
+    @Transactional(readOnly = true)
+    public java.util.Optional<ResumeDetail> findLatest(UUID userId) {
+        return resumes.findFirstByUserIdOrderByVersionDesc(userId)
+            .map(resume -> ResumeDetail.from(resume, read(resume)));
+    }
+
     @Transactional
     public ResumeDetail upload(UUID userId, MultipartFile file) {
         byte[] content = validator.validate(file);

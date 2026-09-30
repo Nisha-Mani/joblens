@@ -55,18 +55,6 @@ public class RuleBasedResumeParser implements ResumeParser {
     private static final int MAX_SKILLS = 100;
     private static final int MAX_SKILL_LENGTH = 40;
 
-    /** Terms detected anywhere in the text. Ambiguous single letters are intentionally excluded. */
-    private static final List<String> KNOWN_TECHNOLOGIES = List.of(
-        "Java", "Kotlin", "Scala", "Python", "JavaScript", "TypeScript", "Node.js", "React", "Angular",
-        "Vue", "Next.js", "Spring Boot", "Spring", "Hibernate", "JUnit", "Mockito", "Jest", "Playwright",
-        "Cypress", "Selenium", "HTML", "CSS", "Tailwind CSS", "Redux", "GraphQL", "REST", "SQL",
-        "PostgreSQL", "MySQL", "MongoDB", "DynamoDB", "Redis", "Kafka", "RabbitMQ", "Elasticsearch",
-        "AWS", "Azure", "GCP", "Docker", "Kubernetes", "Terraform", "Jenkins", "GitHub Actions", "CI/CD",
-        "Git", "Linux", "Maven", "Gradle", "Webpack", "Vite", "Express", "Django", "Flask", "FastAPI",
-        "OpenAI", "LangChain", "C#", ".NET", "C++", "Go", "Rust", "PHP", "Ruby", "Swift");
-
-    private static final Set<String> NEEDS_SKILLS_SECTION = Set.of("Go", "Rust", "Swift", "Spring", "REST");
-
     @Override
     public ParsedResume parse(String text) {
         List<String> lines = text.lines().map(String::strip).toList();
@@ -175,12 +163,12 @@ public class RuleBasedResumeParser implements ResumeParser {
                 }
             }
         }
-        for (String tech : KNOWN_TECHNOLOGIES) {
-            boolean inSection = hasSection && containsTerm(String.join("\n", skillsSection), tech);
-            boolean ambiguous = NEEDS_SKILLS_SECTION.contains(tech);
+        for (String tech : TechnologyDictionary.TERMS) {
+            boolean inSection = hasSection && TechnologyDictionary.containsTerm(String.join("\n", skillsSection), tech);
+            boolean ambiguous = TechnologyDictionary.AMBIGUOUS.contains(tech);
             boolean coveredByLongerSkill = skills.stream()
                 .anyMatch(s -> s.toLowerCase(Locale.ROOT).startsWith(tech.toLowerCase(Locale.ROOT) + " "));
-            if (containsTerm(fullText, tech) && (!ambiguous || inSection) && !coveredByLongerSkill) {
+            if (TechnologyDictionary.containsTerm(fullText, tech) && (!ambiguous || inSection) && !coveredByLongerSkill) {
                 addSkill(skills, seen, tech);
             }
         }
@@ -194,11 +182,6 @@ public class RuleBasedResumeParser implements ResumeParser {
         if (seen.add(candidate.toLowerCase(Locale.ROOT))) {
             skills.add(candidate);
         }
-    }
-
-    private static boolean containsTerm(String text, String term) {
-        Pattern pattern = Pattern.compile("(?<![\\p{L}\\p{N}])" + Pattern.quote(term) + "(?![\\p{L}\\p{N}])");
-        return pattern.matcher(text).find();
     }
 
     /** Groups section lines into entries; blank lines separate entries when {@code byBlankLine}. */
