@@ -45,14 +45,17 @@ export async function apiRequest<T>(
   options: { method?: string; body?: unknown } = {},
 ): Promise<T> {
   const headers: Record<string, string> = { Accept: 'application/json' }
-  if (options.body !== undefined) headers['Content-Type'] = 'application/json'
+  const isForm = options.body instanceof FormData
+  // For FormData the browser sets the multipart Content-Type (with boundary) itself.
+  if (options.body !== undefined && !isForm) headers['Content-Type'] = 'application/json'
   const token = tokenProvider()
   if (token) headers.Authorization = `Bearer ${token}`
 
   const response = await fetch(`${baseUrl}${path}`, {
     method: options.method ?? 'GET',
     headers,
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    body:
+      options.body === undefined ? undefined : isForm ? (options.body as FormData) : JSON.stringify(options.body),
   })
 
   if (response.status === 401 && token) unauthorizedHandler()
@@ -64,6 +67,8 @@ export async function apiRequest<T>(
 export const apiGet = <T>(path: string) => apiRequest<T>(path)
 export const apiPost = <T>(path: string, body?: unknown) =>
   apiRequest<T>(path, { method: 'POST', body })
+export const apiUpload = <T>(path: string, form: FormData) =>
+  apiRequest<T>(path, { method: 'POST', body: form })
 export const apiPut = <T>(path: string, body?: unknown) =>
   apiRequest<T>(path, { method: 'PUT', body })
 export const apiDelete = <T = void>(path: string) => apiRequest<T>(path, { method: 'DELETE' })
