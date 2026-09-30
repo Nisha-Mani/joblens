@@ -35,3 +35,12 @@ Text is extracted with Apache PDFBox and parsed by a rule-based `ResumeParser` (
 
 ## ADR-012: Resume versions and JSONB parsed data
 Each upload creates a new version per user (unique on user and version, conflicts surface as a retryable 409). The parsed result is a JSONB document because it is read and replaced as a whole; the original extracted text is stored separately and never returned by the API.
+
+## ADR-013: Status history for applications
+The application row stores only its current status, so a separate append-only `application_status_history` table records every transition. Funnel metrics such as "ever reached interview" or response rate must survive later moves to REJECTED or WITHDRAWN, and they cannot be derived from the current status alone. Any status can move to any other (people correct mistakes and get re-engaged); only real changes create history rows.
+
+## ADR-014: One application per job, applications owned by their job
+`applications.job_id` is unique and cascades on delete: an application is the user's pursuit of that specific posting. The application module reads jobs through `JobService.requireOwned`, so ownership rules live in one place. Sorting by company uses a fetch-join (entity graph) so a page of applications costs one query, not one per row.
+
+## ADR-015: List state lives in the URL
+Search, filters, sort and page are query parameters on the list pages. Reloads, back/forward and shared links restore the exact view, and TanStack Query keys derive from the same values, so there is no separate UI state to drift out of sync.
