@@ -12,14 +12,16 @@
 - Milestone 7: AI analysis pipeline (prompt templates with PII stripping and size budgets, `AiClient` with mock and OpenAI implementations, strict response validation, single retry on unusable output, timeout/throttle/outage/missing-key handling, per-user rate limit, no transaction held during the call), persistence (Flyway V7), job-page UI, E2E on the mock provider. The real OpenAI path is verified against a local stub server and boots cleanly without a key; it has not been exercised against the live API (no key available).
 - Milestone 8: interview question generation (technical, behavioral, project, role-specific; difficulty; related skills) on the shared AI pipeline, additive/deduplicated generation, custom questions, per-question notes and preparation status, server-side filter/pagination, Interview prep page, E2E on the mock provider.
 - Milestone 9: SQL-backed dashboard/analytics endpoint (totals, response/interview/offer rates from status history, status distribution, zero-filled monthly series, upcoming interviews, recent applications, top missing skills), Dashboard and Analytics pages with accessible charts, table fallbacks, empty states, E2E against real data and a visual check.
+- Milestone 10: quality pass. Found and fixed a real race (concurrent skill adds returned 500s; now `INSERT ... ON CONFLICT`). Added an authorization sweep that discovers every route and proves anonymous access is rejected, robustness tests (malformed/oversized/wrong-type input, no stack-trace leaks, security headers, CORS), concurrency tests (registration, applications, resume versions, skills), storage path-traversal tests, an error boundary, axe accessibility checks on 14 screens (fixed heading-order and definition-list issues), session-expiry E2E, coverage tooling, and removed unused dependencies (Lombok, Recharts). Whole E2E suite verified deterministic over 5 consecutive runs.
 
 ## In Progress
-- Milestone 10: testing and quality hardening.
+- Milestone 11: Docker.
 
 ## Tests
-- Backend: 213 tests (auth, profile/skills, resume, jobs, applications, AI, interview, analytics metric definitions, error handler, health).
-- Frontend: 128 Vitest tests.
-- E2E: 22 Playwright tests (auth, profile, resume, jobs, applications, AI analysis, interview prep, dashboard/analytics, cross-user access).
+Measured, not estimated:
+- Backend: 241 tests; 94.9% line / 85.3% branch coverage (JaCoCo, `./mvnw verify`).
+- Frontend: 144 Vitest tests; 94.7% statement / 87.5% branch coverage (`npm run coverage`); axe accessibility checks on 14 screens; production bundle 145 kB gzipped.
+- E2E: 25 Playwright tests, 125/125 passing over five consecutive runs.
 
 ## Known Issues
 - The live OpenAI integration has only been tested against a stub; a real-key smoke test is still to do.
@@ -29,4 +31,4 @@
 - Backend tests need a `joblens_test` database (see README).
 
 ## Next
-- Milestone 10: coverage measurement, security/authorization review, accessibility and race-condition review, flaky-test sweep.
+- Milestone 11: Dockerfiles and a one-command `docker compose up` (frontend, backend, PostgreSQL) with health checks.

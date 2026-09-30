@@ -46,8 +46,8 @@ Other AI settings: `AI_TIMEOUT_SECONDS`, `AI_MAX_OUTPUT_TOKENS`, `ANALYSIS_RATE_
 ## Tests
 
 ```bash
-cd backend && set -a && source ../.env && set +a && ./mvnw test
-cd frontend && npm run lint && npm test && npm run build
+cd backend && set -a && source ../.env && set +a && ./mvnw verify      # tests + JaCoCo report (target/site/jacoco)
+cd frontend && npm run lint && npm run coverage && npm run build
 cd e2e && npm install && npx playwright install chromium && npx playwright test   # needs joblens_e2e DB
 ```
 
