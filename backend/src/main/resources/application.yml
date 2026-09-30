@@ -1,3 +1,7 @@
+server:
+  # Behind CloudFront/nginx: honour X-Forwarded-* so redirects and scheme detection are correct.
+  forward-headers-strategy: framework
+
 spring:
   application:
     name: joblens
@@ -36,7 +40,12 @@ app:
     max-output-tokens: ${AI_MAX_OUTPUT_TOKENS:1500}
     rate-limit-per-hour: ${ANALYSIS_RATE_LIMIT_PER_HOUR:20}
   storage:
+    type: ${STORAGE_TYPE:local}   # local | s3
     local-dir: ${STORAGE_LOCAL_DIR:./data/uploads}
+    s3:
+      bucket: ${S3_BUCKET:}
+      region: ${AWS_REGION:}
+      endpoint: ${S3_ENDPOINT:}   # only for S3-compatible services such as MinIO
   jwt:
     secret: ${JWT_SECRET:}
     expiry-minutes: ${JWT_EXPIRY_MINUTES:60}
