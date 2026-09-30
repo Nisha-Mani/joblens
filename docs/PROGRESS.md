@@ -1,18 +1,19 @@
 # Progress
 
 ## Completed
-- Milestone 0/1 foundation: repo layout, Spring Boot 4.1 backend, Vite/React/TS/Tailwind frontend, PostgreSQL via Docker Compose, Flyway baseline, health + ping endpoints, CORS, initial CI workflow, architecture docs.
+- Milestone 0: repo layout, Spring Boot 4.1 backend, Vite/React/TS/Tailwind frontend, PostgreSQL via Docker Compose, Flyway baseline, CI (green on GitHub).
+- Milestone 1: backend global error handling (RFC 7807), OpenAPI/Swagger UI, 401 for unauthenticated requests; frontend routing, app layout and navigation, API client (problem-detail parsing, token hook, 401 handling), shared UI primitives (loading, error, empty states, accessible form field), RHF + Zod validation pattern.
 
 ## In Progress
-- Milestone 1: frontend layout/routing, API client error handling, backend exception handling, OpenAPI.
+- Milestone 2: authentication and authorization.
 
 ## Tests
-- Backend: 3 MockMvc tests (ping, health, auth required) against PostgreSQL.
-- Frontend: 2 Vitest tests (API connected / unreachable states).
+- Backend: 8 tests (ping, health, OpenAPI, auth required, error handler mapping and validation).
+- Frontend: 11 Vitest tests (API client, form validation, routing, home states).
 
 ## Known Issues
 - Spring Security prints a generated dev password at startup until JWT auth replaces it (Milestone 2).
 - Backend tests need a `joblens_test` database (see README).
 
 ## Next
-- Finish Milestone 1, then Milestone 2 (authentication and authorization).
+- Milestone 2: registration, login, JWT, protected routes, roles.
