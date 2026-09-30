@@ -47,7 +47,7 @@ jobs:
     timeout-minutes: 30
     environment: production # add required reviewers to this environment for a manual approval gate
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.ref }}
 
@@ -62,7 +62,7 @@ jobs:
           test "$state" = "success" || { echo "::error::Refusing to deploy a commit whose CI has not passed."; exit 1; }
           echo "SHA=$sha" >> "$GITHUB_ENV"
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
@@ -78,7 +78,7 @@ jobs:
           docker build -t "$REGISTRY/$REPO:$SHA" backend
           docker push "$REGISTRY/$REPO:$SHA"
 
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: "1.9.8"
 
@@ -101,7 +101,7 @@ jobs:
           echo "FRONTEND_BUCKET=$(terraform output -raw frontend_bucket)" >> "$GITHUB_ENV"
           echo "DISTRIBUTION_ID=$(terraform output -raw cloudfront_distribution_id)" >> "$GITHUB_ENV"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "20"
           cache: npm
