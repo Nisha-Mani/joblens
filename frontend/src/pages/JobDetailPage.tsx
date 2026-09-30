@@ -6,6 +6,8 @@ import { Button } from '../components/ui/Button'
 import { ErrorState } from '../components/ui/ErrorState'
 import { Spinner } from '../components/ui/Spinner'
 import { ApiError } from '../lib/api'
+import { searchApplications } from '../features/applications/api'
+import { StatusBadge } from '../components/ui/StatusBadge'
 import { deleteJob, employmentLabel, getJob, updateJob } from '../features/jobs/api'
 import { JobForm } from '../features/jobs/JobForm'
 
@@ -19,6 +21,11 @@ export default function JobDetailPage() {
     queryKey: ['job', id],
     queryFn: () => getJob(id),
     retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 1,
+  })
+
+  const tracking = useQuery({
+    queryKey: ['applications', { jobId: id }],
+    queryFn: () => searchApplications({ q: '', status: '', jobId: id, sortBy: 'updatedAt', direction: 'desc', page: 0, size: 1 }),
   })
 
   const update = useMutation({
@@ -81,6 +88,20 @@ export default function JobDetailPage() {
           Source: <a className="underline" href={data.sourceUrl} target="_blank" rel="noopener noreferrer">{data.sourceUrl}</a>
         </p>
       )}
+      <section aria-labelledby="tracking-heading">
+        <h2 id="tracking-heading" className="mb-2 text-lg font-semibold">Application</h2>
+        {tracking.isPending && <Spinner label="Checking application…" />}
+        {tracking.isError && <p className="text-sm text-red-700">Could not check application status.</p>}
+        {tracking.isSuccess && tracking.data.content.length > 0 && (
+          <p className="flex items-center gap-2 text-sm">
+            <StatusBadge status={tracking.data.content[0].status} />
+            <Link className="underline" to={`/applications/${tracking.data.content[0].id}`}>View application</Link>
+          </p>
+        )}
+        {tracking.isSuccess && tracking.data.content.length === 0 && (
+          <Link to={`/applications/new?jobId=${id}`} className="text-sm font-medium underline">Track this application</Link>
+        )}
+      </section>
       <section aria-labelledby="description-heading">
         <h2 id="description-heading" className="mb-2 text-lg font-semibold">Job description</h2>
         <div className="whitespace-pre-wrap rounded-lg border border-slate-200 bg-white p-4 text-sm leading-relaxed">
