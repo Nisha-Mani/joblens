@@ -74,6 +74,12 @@ public class JobService {
         log.info("Job deleted: id={}", id);
     }
 
+    /** For other modules: the job entity if it belongs to the user, otherwise 404. */
+    @Transactional(readOnly = true)
+    public Job requireOwned(UUID userId, UUID id) {
+        return find(userId, id);
+    }
+
     private Job find(UUID userId, UUID id) {
         return jobs.findByIdAndUserId(id, userId).orElseThrow(() -> new NotFoundException("Job not found"));
     }
