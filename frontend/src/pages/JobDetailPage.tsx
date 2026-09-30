@@ -8,6 +8,7 @@ import { Spinner } from '../components/ui/Spinner'
 import { ApiError } from '../lib/api'
 import { searchApplications } from '../features/applications/api'
 import { StatusBadge } from '../components/ui/StatusBadge'
+import { AnalysisPanel } from '../features/analysis/AnalysisPanel'
 import { deleteJob, employmentLabel, getJob, updateJob } from '../features/jobs/api'
 import { JobForm } from '../features/jobs/JobForm'
 
@@ -102,6 +103,7 @@ export default function JobDetailPage() {
           <Link to={`/applications/new?jobId=${id}`} className="text-sm font-medium underline">Track this application</Link>
         )}
       </section>
+      <AnalysisPanel jobId={id} />
       <section aria-labelledby="description-heading">
         <h2 id="description-heading" className="mb-2 text-lg font-semibold">Job description</h2>
         <div className="whitespace-pre-wrap rounded-lg border border-slate-200 bg-white p-4 text-sm leading-relaxed">
