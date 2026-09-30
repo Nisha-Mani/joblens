@@ -1,0 +1,138 @@
+name: Deploy
+
+# Manual only. Nothing deploys on push, and nothing runs until AWS is configured (see docs/DEPLOYMENT.md).
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref (branch, tag or SHA) to deploy"
+        required: true
+        default: main
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false # never interrupt a deployment half way
+
+permissions:
+  contents: read
+  id-token: write # lets the job exchange GitHub's OIDC token for short-lived AWS credentials: no stored keys
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+
+jobs:
+  check-config:
+    name: Check deployment is configured
+    runs-on: ubuntu-latest
+    outputs:
+      configured: ${{ steps.check.outputs.configured }}
+    steps:
+      - id: check
+        env:
+          ROLE: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          REGION: ${{ vars.AWS_REGION }}
+        run: |
+          if [ -n "$ROLE" ] && [ -n "$REGION" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::AWS is not configured (set repository variables AWS_DEPLOY_ROLE_ARN and AWS_REGION). Nothing was deployed."
+          fi
+
+  deploy:
+    name: Build, push and release
+    needs: check-config
+    if: needs.check-config.outputs.configured == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production # add required reviewers to this environment for a manual approval gate
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Verify the ref passed CI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha=$(git rev-parse HEAD)
+          state=$(gh api "repos/${{ github.repository }}/commits/$sha/check-runs" \
+            --jq '[.check_runs[] | select(.name=="CI passed")] | sort_by(.completed_at) | last | .conclusion // "missing"')
+          echo "CI status for $sha: $state"
+          test "$state" = "success" || { echo "::error::Refusing to deploy a commit whose CI has not passed."; exit 1; }
+          echo "SHA=$sha" >> "$GITHUB_ENV"
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push the backend image
+        env:
+          REPO: ${{ vars.ECR_REPOSITORY }}
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+        run: |
+          docker build -t "$REGISTRY/$REPO:$SHA" backend
+          docker push "$REGISTRY/$REPO:$SHA"
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+
+      - name: Apply infrastructure (new backend image)
+        working-directory: infra/terraform
+        env:
+          TF_VAR_backend_image_tag: ${{ env.SHA }}
+          TF_VAR_aws_region: ${{ vars.AWS_REGION }}
+          TF_VAR_ai_provider: ${{ vars.AI_PROVIDER || 'mock' }}
+          TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+          TF_VAR_enable_nat_gateway: ${{ vars.ENABLE_NAT_GATEWAY || 'false' }}
+        run: |
+          terraform init -input=false \
+            -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" \
+            -backend-config="key=joblens/prod/terraform.tfstate" \
+            -backend-config="region=${{ vars.AWS_REGION }}" \
+            -backend-config="encrypt=true"
+          terraform apply -input=false -auto-approve
+          echo "SITE_URL=$(terraform output -raw site_url)" >> "$GITHUB_ENV"
+          echo "FRONTEND_BUCKET=$(terraform output -raw frontend_bucket)" >> "$GITHUB_ENV"
+          echo "DISTRIBUTION_ID=$(terraform output -raw cloudfront_distribution_id)" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build the frontend (same-origin API, no URL baked in)
+        working-directory: frontend
+        env:
+          VITE_API_BASE_URL: ""
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publish the frontend
+        run: |
+          # Hashed assets are immutable; the app shell must always be revalidated.
+          aws s3 sync frontend/dist "s3://$FRONTEND_BUCKET" --delete --exclude index.html \
+            --cache-control "public,max-age=31536000,immutable"
+          aws s3 cp frontend/dist/index.html "s3://$FRONTEND_BUCKET/index.html" \
+            --cache-control "no-cache" --content-type "text/html"
+          aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "/index.html" > /dev/null
+
+      - name: Smoke test the live site
+        run: |
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$SITE_URL/api/ping" || true)
+            [ "$code" = "200" ] && break
+            sleep 10
+          done
+          test "$code" = "200" || { echo "::error::$SITE_URL/api/ping returned $code"; exit 1; }
+          curl -fsS "$SITE_URL/" | grep -qi '<div id="root">'
+          test "$(curl -s -o /dev/null -w '%{http_code}' "$SITE_URL/api/jobs")" = "401"
+          echo "### Deployed $SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "$SITE_URL" >> "$GITHUB_STEP_SUMMARY"
