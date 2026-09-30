@@ -11,7 +11,7 @@ public record JwtProperties(String secret, long expiryMinutes, String issuer) {
         if (secret == null || secret.getBytes().length < MIN_SECRET_BYTES) {
             throw new IllegalStateException(
                 "JWT_SECRET must be set and at least " + MIN_SECRET_BYTES
-                    + " bytes long (generate one with: openssl rand -base64 48)");
+                    + " bytes long (generate one with: openssl rand -hex 32)");
         }
         if (expiryMinutes <= 0) {
             throw new IllegalStateException("app.jwt.expiry-minutes must be positive");
