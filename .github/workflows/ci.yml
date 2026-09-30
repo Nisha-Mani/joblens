@@ -4,10 +4,26 @@ on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
+
+# Superseded pull-request runs are cancelled; runs on main always complete.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Least privilege: CI only reads the repository.
+permissions:
+  contents: read
+
+env:
+  JAVA_VERSION: "21"
+  NODE_VERSION: "20"
 
 jobs:
   backend:
+    name: Backend (build, test, coverage)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     services:
       postgres:
         image: postgres:16-alpine
@@ -28,32 +44,77 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: ${{ env.JAVA_VERSION }}
           cache: maven
-      - run: ./mvnw -B verify
+      - name: Build and test
+        run: ./mvnw -B verify
         working-directory: backend
+      - name: Coverage summary
+        if: always()
+        run: |
+          python3 - >> "$GITHUB_STEP_SUMMARY" <<'PY'
+          import csv, os
+          path = "backend/target/site/jacoco/jacoco.csv"
+          if os.path.exists(path):
+              rows = list(csv.DictReader(open(path)))
+              def pct(k):
+                  m = sum(int(r[k + "_MISSED"]) for r in rows); c = sum(int(r[k + "_COVERED"]) for r in rows)
+                  return f"{100 * c / (m + c):.1f}%"
+              print(f"### Backend coverage\nLine **{pct('LINE')}** · Branch **{pct('BRANCH')}**")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-reports
+          path: |
+            backend/target/site/jacoco
+            backend/target/surefire-reports
+          if-no-files-found: ignore
+          retention-days: 7
 
   frontend:
+    name: Frontend (lint, typecheck, test, build)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
         working-directory: frontend
       - run: npm run lint
         working-directory: frontend
-      - run: npm test
+      - run: npm run typecheck
         working-directory: frontend
-      - run: npm run build
+      - name: Unit tests with coverage
+        run: npm run coverage
         working-directory: frontend
+      - name: Production build
+        run: npm run build
+        working-directory: frontend
+      - name: Bundle size
+        run: |
+          {
+            echo "### Frontend bundle"
+            for f in frontend/dist/assets/*.js frontend/dist/assets/*.css; do
+              echo "- \`$(basename "$f")\`: $(du -k "$f" | cut -f1) kB ($(gzip -c "$f" | wc -c | awk '{printf "%.0f", $1/1024}') kB gzipped)"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-coverage
+          path: frontend/coverage
+          if-no-files-found: ignore
+          retention-days: 7
 
   e2e:
+    name: E2E (Playwright, dev servers)
     runs-on: ubuntu-latest
-    needs: [backend, frontend]
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:16-alpine
@@ -74,11 +135,15 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: ${{ env.JAVA_VERSION }}
           cache: maven
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            e2e/package-lock.json
       - run: npm ci
         working-directory: frontend
       - run: npm ci
@@ -90,5 +155,68 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report
-          path: e2e/playwright-report
+          name: playwright-report-dev
+          path: |
+            e2e/playwright-report
+            e2e/test-results
+          retention-days: 7
+
+  docker:
+    name: Docker (build images, run the stack, E2E against it)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate throwaway secrets for this run
+        run: |
+          pw=$(openssl rand -hex 16); jwt=$(openssl rand -hex 32)
+          echo "::add-mask::$pw"; echo "::add-mask::$jwt"
+          echo "POSTGRES_PASSWORD=$pw" >> "$GITHUB_ENV"
+          echo "JWT_SECRET=$jwt" >> "$GITHUB_ENV"
+      - name: Build images and start the stack
+        run: docker compose up -d --build --wait --wait-timeout 240
+      - name: Smoke test
+        run: |
+          curl -fsS http://localhost:8080/ > /dev/null
+          curl -fsS http://localhost:8080/api/ping
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/api/jobs)" = "401"
+          curl -sI http://localhost:8080/ | grep -i '^x-content-type-options: nosniff'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+      - run: npm ci
+        working-directory: e2e
+      - run: npx playwright install --with-deps chromium
+        working-directory: e2e
+      - name: E2E against the running containers
+        run: npx playwright test
+        working-directory: e2e
+        env:
+          E2E_BASE_URL: http://localhost:8080
+          E2E_API_URL: http://localhost:8080
+      - name: Image sizes
+        if: always()
+        run: |
+          {
+            echo "### Docker images"
+            docker images --format '- `{{.Repository}}`: {{.Size}}' | grep -E 'backend|frontend'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Container logs on failure
+        if: failure()
+        run: docker compose logs --no-color --tail 200
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
+
+  # One stable check to require in branch protection instead of listing every job.
+  ci-ok:
+    name: CI passed
+    if: always()
+    needs: [backend, frontend, e2e, docker]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every job to have succeeded
+        run: |
+          echo '${{ toJSON(needs) }}' | python3 -c "import json,sys; r=json.load(sys.stdin); bad={k:v['result'] for k,v in r.items() if v['result']!='success'}; print(bad or 'all green'); sys.exit(1 if bad else 0)"
